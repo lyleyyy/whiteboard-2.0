@@ -622,6 +622,70 @@
   resolved "https://registry.yarnpkg.com/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz#821f8442f4175d8f0467b9daf26e3a18e2d02af2"
   integrity sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==
 
+"@supabase/auth-js@2.70.0":
+  version "2.70.0"
+  resolved "https://registry.yarnpkg.com/@supabase/auth-js/-/auth-js-2.70.0.tgz#d4a0021d8a229d1ec23dd49ca76c486a686b6c14"
+  integrity sha512-BaAK/tOAZFJtzF1sE3gJ2FwTjLf4ky3PSvcvLGEgEmO4BSBkwWKu8l67rLLIBZPDnCyV7Owk2uPyKHa0kj5QGg==
+  dependencies:
+    "@supabase/node-fetch" "^2.6.14"
+
+"@supabase/functions-js@2.4.4":
+  version "2.4.4"
+  resolved "https://registry.yarnpkg.com/@supabase/functions-js/-/functions-js-2.4.4.tgz#45fcd94d546bdfa66d01f93a796ca0304ec154b8"
+  integrity sha512-WL2p6r4AXNGwop7iwvul2BvOtuJ1YQy8EbOd0dhG1oN1q8el/BIRSFCFnWAMM/vJJlHWLi4ad22sKbKr9mvjoA==
+  dependencies:
+    "@supabase/node-fetch" "^2.6.14"
+
+"@supabase/node-fetch@2.6.15", "@supabase/node-fetch@^2.6.14":
+  version "2.6.15"
+  resolved "https://registry.yarnpkg.com/@supabase/node-fetch/-/node-fetch-2.6.15.tgz#731271430e276983191930816303c44159e7226c"
+  integrity sha512-1ibVeYUacxWYi9i0cf5efil6adJ9WRyZBLivgjs+AUpewx1F3xPi7gLgaASI2SmIQxPoCEjAsLAzKPgMJVgOUQ==
+  dependencies:
+    whatwg-url "^5.0.0"
+
+"@supabase/node-fetch@^2.6.13":
+  version "2.6.13"
+  resolved "https://registry.yarnpkg.com/@supabase/node-fetch/-/node-fetch-2.6.13.tgz#0d36219a9e2134049a7317591e1d4fbf73a42ec4"
+  integrity sha512-rEHQaDVzxLZMCK3p+JW2nzEsK4AJpOQhetppaqAzrFum0Ub8wcnoM/8f1dWRZSulY5fRDP6rJaWT/8X3VleCzg==
+  dependencies:
+    whatwg-url "^5.0.0"
+
+"@supabase/postgrest-js@1.19.4":
+  version "1.19.4"
+  resolved "https://registry.yarnpkg.com/@supabase/postgrest-js/-/postgrest-js-1.19.4.tgz#41de1e4310ce8ddba87becd7e0878f4ad7a659a2"
+  integrity sha512-O4soKqKtZIW3olqmbXXbKugUtByD2jPa8kL2m2c1oozAO11uCcGrRhkZL0kVxjBLrXHE0mdSkFsMj7jDSfyNpw==
+  dependencies:
+    "@supabase/node-fetch" "^2.6.14"
+
+"@supabase/realtime-js@2.11.10":
+  version "2.11.10"
+  resolved "https://registry.yarnpkg.com/@supabase/realtime-js/-/realtime-js-2.11.10.tgz#602fffa96082a05c07f144369736eaec4301d6f1"
+  integrity sha512-SJKVa7EejnuyfImrbzx+HaD9i6T784khuw1zP+MBD7BmJYChegGxYigPzkKX8CK8nGuDntmeSD3fvriaH0EGZA==
+  dependencies:
+    "@supabase/node-fetch" "^2.6.13"
+    "@types/phoenix" "^1.6.6"
+    "@types/ws" "^8.18.1"
+    ws "^8.18.2"
+
+"@supabase/storage-js@2.7.1":
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/@supabase/storage-js/-/storage-js-2.7.1.tgz#761482f237deec98a59e5af1ace18c7a5e0a69af"
+  integrity sha512-asYHcyDR1fKqrMpytAS1zjyEfvxuOIp1CIXX7ji4lHHcJKqyk+sLl/Vxgm4sN6u8zvuUtae9e4kDxQP2qrwWBA==
+  dependencies:
+    "@supabase/node-fetch" "^2.6.14"
+
+"@supabase/supabase-js@^2.50.0":
+  version "2.50.0"
+  resolved "https://registry.yarnpkg.com/@supabase/supabase-js/-/supabase-js-2.50.0.tgz#77b908f42e819cc0146c44319852c35a5f353628"
+  integrity sha512-M1Gd5tPaaghYZ9OjeO1iORRqbTWFEz/cF3pPubRnMPzA+A8SiUsXXWDP+DWsASZcjEcVEcVQIAF38i5wrijYOg==
+  dependencies:
+    "@supabase/auth-js" "2.70.0"
+    "@supabase/functions-js" "2.4.4"
+    "@supabase/node-fetch" "2.6.15"
+    "@supabase/postgrest-js" "1.19.4"
+    "@supabase/realtime-js" "2.11.10"
+    "@supabase/storage-js" "2.7.1"
+
 "@tailwindcss/node@4.1.8":
   version "4.1.8"
   resolved "https://registry.yarnpkg.com/@tailwindcss/node/-/node-4.1.8.tgz#e29187abec6194ce1e9f072208c62116a79a129b"
@@ -951,6 +1015,11 @@
   dependencies:
     undici-types "~6.21.0"
 
+"@types/phoenix@^1.6.6":
+  version "1.6.6"
+  resolved "https://registry.yarnpkg.com/@types/phoenix/-/phoenix-1.6.6.tgz#3c1ab53fd5a23634b8e37ea72ccacbf07fbc7816"
+  integrity sha512-PIzZZlEppgrpoT2QgbnDU+MMzuR6BbCjllj0bM70lWoejMeNJAxCchxnv7J3XFkI8MpygtRpzXrIlmWUBclP5A==
+
 "@types/qs@*":
   version "6.14.0"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.14.0.tgz#d8b60cecf62f2db0fb68e5e006077b9178b85de5"
@@ -1023,6 +1092,13 @@
   version "1.4.6"
   resolved "https://registry.yarnpkg.com/@types/tinycolor2/-/tinycolor2-1.4.6.tgz#670cbc0caf4e58dd61d1e3a6f26386e473087f06"
   integrity sha512-iEN8J0BoMnsWBqjVbWH/c0G0Hh7O21lpR2/+PrvAVgWdzL7eexIFm4JN/Wn10PTcmNdtS6U67r499mlWMXOxNw==
+
+"@types/ws@^8.18.1":
+  version "8.18.1"
+  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-8.18.1.tgz#48464e4bf2ddfd17db13d845467f6070ffea4aa9"
+  integrity sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==
+  dependencies:
+    "@types/node" "*"
 
 "@typescript-eslint/eslint-plugin@8.34.0", "@typescript-eslint/eslint-plugin@^8.34.0":
   version "8.34.0"
@@ -4659,6 +4735,11 @@ touch@^3.1.0:
   resolved "https://registry.yarnpkg.com/touch/-/touch-3.1.1.tgz#097a23d7b161476435e5c1344a95c0f75b4a5694"
   integrity sha512-r0eojU4bI8MnHr8c5bNo7lJDdI2qXlWWJk6a9EAFG7vbhTjElYhBVS3/miuE0uOuoLdb8Mc/rVfsmm6eo5o9GA==
 
+tr46@~0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
+  integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
+
 ts-api-utils@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/ts-api-utils/-/ts-api-utils-2.1.0.tgz#595f7094e46eed364c13fd23e75f9513d29baf91"
@@ -4941,6 +5022,19 @@ wcwidth@^1.0.1:
   dependencies:
     defaults "^1.0.3"
 
+webidl-conversions@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-3.0.1.tgz#24534275e2a7bc6be7bc86611cc16ae0a5654871"
+  integrity sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==
+
+whatwg-url@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/whatwg-url/-/whatwg-url-5.0.0.tgz#966454e8765462e37644d3626f6742ce8b70965d"
+  integrity sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==
+  dependencies:
+    tr46 "~0.0.3"
+    webidl-conversions "^3.0.0"
+
 which-boxed-primitive@^1.1.0, which-boxed-primitive@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/which-boxed-primitive/-/which-boxed-primitive-1.1.1.tgz#d76ec27df7fa165f18d5808374a5fe23c29b176e"
@@ -5024,6 +5118,11 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==
+
+ws@^8.18.2:
+  version "8.18.2"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.2.tgz#42738b2be57ced85f46154320aabb51ab003705a"
+  integrity sha512-DMricUmwGZUVr++AEAe2uiVM7UoO9MAVZMDu05UQOaUII0lp+zOzLLU4Xqh/JvTqklB1T4uELaaPBKyjE1r4fQ==
 
 ws@~8.17.1:
   version "8.17.1"

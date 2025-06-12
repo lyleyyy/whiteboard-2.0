@@ -1,9 +1,11 @@
 import { faker } from "@faker-js/faker";
+import type { User } from "../types/User";
 
-function generateGuest() {
+function generateGuest(): User {
   return {
     userId: faker.string.uuid(),
     username: faker.internet.username(),
+    role: "guest",
   };
 }
 

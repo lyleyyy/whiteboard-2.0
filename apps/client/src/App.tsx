@@ -1,19 +1,20 @@
-import { useEffect, useState } from "react";
-import { DrawLineCommand } from "./commands/DrawLineCommand.ts";
+import { useEffect, useRef, useState } from "react";
 import { Stage, Layer, Line } from "react-konva";
-import generateGuest from "./utils/guestGenerator.ts";
-import { v4 as uuidv4 } from "uuid";
-import ThemeButton from "./components/ThemeButton.tsx";
 import { NavLink, useSearchParams } from "react-router";
+import { v4 as uuidv4 } from "uuid";
+import { PiCursorClickDuotone } from "react-icons/pi";
 import { socket } from "./lib/socketClient.ts";
+import generateGuest from "./utils/guestGenerator.ts";
+import ThemeButton from "./components/ThemeButton.tsx";
 import NewRoomModal from "./components/NewRoomModal.tsx";
 import SecondaryButton from "./components/SecondaryButton.tsx";
-import { PiCursorClickDuotone } from "react-icons/pi";
+import { DrawLineCommand } from "./commands/DrawLineCommand.ts";
 import type { Command } from "./commands/types";
 import type { LineInterface } from "./types/LineInterface.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { UserCursor } from "./types/UserCursor.ts";
 import type { User } from "./types/User.ts";
+import type Konva from "konva";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User>();
@@ -26,10 +27,11 @@ function App() {
   const [isNewRoomModalOpen, setIsNewRoomModalOpen] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const roomId = searchParams.get("room");
+  const stageRef = useRef<Konva.Stage | null>(null);
 
+  // initialize the user
   useEffect(() => {
     const owner = localStorage.getItem("whiteboard_owner");
-    console.log(owner);
 
     if (!owner) {
       const guest = generateGuest();
@@ -41,9 +43,9 @@ function App() {
     }
   }, []);
 
+  // if there is params of roomId in the url, join the room
   useEffect(() => {
     if (searchParams) {
-      // console.log(`I am in room ${roomId}`);
       socket.emit("joinroom", roomId);
     }
   }, [searchParams, roomId]);
@@ -98,33 +100,32 @@ function App() {
       }
     }
 
-    function test(e: KeyboardEvent) {
-      if (e.key === "q") {
-        console.log(lines, "the lines state");
-        console.log(undoStack);
-        console.log(redoStack);
-      }
-    }
+    // function test(e: KeyboardEvent) {
+    //   if (e.key === "q") {
+    //     console.log(lines, "the lines state");
+    //     console.log(undoStack);
+    //     console.log(redoStack);
+    //   }
+    // }
 
     window.addEventListener("keydown", undoRedo);
-    window.addEventListener("keydown", test);
+    // window.addEventListener("keydown", test);
 
     return () => {
       window.removeEventListener("keydown", undoRedo);
-      window.removeEventListener("keydown", test);
+      // window.removeEventListener("keydown", test);
     };
   }, [undoStack, redoStack, lines, roomId, currentUser]);
 
   // socket listener
   useEffect(() => {
     socket.on("command", (data) => {
-      console.log(data, "wqdqdqwdwqdwq");
-      if (roomId !== data.roomId) return;
+      if (!currentUser || roomId !== data.roomId) return;
 
       // testing
-      console.log(data.userId, "data.userId");
+      // console.log(data.userId, "data.userId");
       // this is where the bug happened, the local undo delete the line, but in the event loop it not yet re-render, and then this emit command undo happen, the lines state is the same as the one just deleted line, so the state is not change, so the line has been deleted from the lines, but the re-render is not triggered? But why only happend when another user draw something
-      if (data.userId === currentUser?.userId) return;
+      if (data.userId === currentUser.userId) return;
 
       if (data.type === "draw") {
         if (data.shape === "line") {
@@ -224,23 +225,56 @@ function App() {
     }
   }
 
-  function handleNewRoom(e: React.MouseEvent<HTMLButtonElement>) {
+  async function handleNewRoom(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
 
-    const params = new URLSearchParams();
-    const newRoomId = uuidv4();
-    params.set("room", newRoomId);
-    setSearchParams(params);
+    if (currentUser) {
+      const options = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ownerId: currentUser.userId,
+        }),
+      };
 
-    setIsNewRoomModalOpen(true);
+      const res = await fetch(
+        `${import.meta.env.VITE_SOCKET_SERVER_ADDRESS}/room`,
+        options
+      );
+      const data = await res.json();
+
+      const params = new URLSearchParams();
+      const newRoomId = data.roomId;
+      params.set("room", newRoomId);
+      setSearchParams(params);
+
+      setIsNewRoomModalOpen(true);
+    }
+  }
+
+  function handleSaveBoard() {
+    if (stageRef.current) {
+      const options = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId,
+          ownerId: currentUser?.userId,
+          board: stageRef.current,
+        }),
+      };
+
+      fetch(`${import.meta.env.VITE_SOCKET_SERVER_ADDRESS}/room`, options);
+    }
   }
 
   return (
     <>
-      {otherUserCursors.length !== 0 &&
+      {currentUser &&
+        otherUserCursors.length !== 0 &&
         otherUserCursors.map((userCursor) => {
           const { coord, userName } = userCursor;
-          if (currentUser?.userId !== userCursor.userId) {
+          if (currentUser.userId !== userCursor.userId) {
             const { x, y } = coord;
 
             return (
@@ -262,7 +296,15 @@ function App() {
         />
       )}
 
-      {!roomId && (
+      {currentUser && currentUser.role === "owner" && (
+        <ThemeButton
+          positionCss="absolute right-40 top-5"
+          buttonName="Save"
+          onClick={handleSaveBoard}
+        />
+      )}
+
+      {!roomId && currentUser && currentUser.role === "owner" && (
         <ThemeButton
           positionCss="absolute right-5 top-5"
           buttonName="New Room"
@@ -285,6 +327,7 @@ function App() {
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
+        ref={stageRef}
       >
         <Layer>
           {isDrawing && <Line points={line?.points} stroke="black" />}

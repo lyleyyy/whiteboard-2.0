@@ -1,8 +1,9 @@
-import express, { Express } from 'express'
+import express, { Express, Request, Response } from 'express'
 import dotenv from 'dotenv'
 import { createServer } from 'http'
 import cors from 'cors'
 import { Server } from 'socket.io'
+import { create } from '../data/room.repository'
 dotenv.config()
 
 const app: Express = express()
@@ -17,6 +18,19 @@ const io = new Server(server, {
 
 app.use(cors())
 app.use(express.json())
+
+app.post('/room', async (req: Request, res: Response) => {
+  const { ownerId } = req.body
+
+  try {
+    const data = await create(ownerId)
+    const newRoom = data[0]
+
+    res.status(201).json({ roomId: newRoom.id })
+  } catch (err) {
+    res.status(500).json({ message: 'Internal Error' })
+  }
+})
 
 io.on('connection', (socket) => {
   // ...
@@ -36,7 +50,6 @@ io.on('connection', (socket) => {
 
   socket.on('cursormove', (data) => {
     const { roomId } = data
-    console.log(data, 'move')
 
     io.to(roomId).emit('cursormove', data)
   })
