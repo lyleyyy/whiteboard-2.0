@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Stage, Layer, Line } from "react-konva";
+import { useEffect, useState } from "react";
+import { Stage, Layer, Line, Circle } from "react-konva";
 import { NavLink, useSearchParams } from "react-router";
 import { v4 as uuidv4 } from "uuid";
 import { PiCursorClickDuotone } from "react-icons/pi";
@@ -8,13 +8,13 @@ import generateGuest from "./utils/guestGenerator.ts";
 import ThemeButton from "./components/ThemeButton.tsx";
 import NewRoomModal from "./components/NewRoomModal.tsx";
 import SecondaryButton from "./components/SecondaryButton.tsx";
+import ShapeSelectorBar from "./components/ShapeSelectorBar.tsx";
 import { DrawLineCommand } from "./commands/DrawLineCommand.ts";
 import type { Command } from "./commands/types";
 import type { LineInterface } from "./types/LineInterface.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { UserCursor } from "./types/UserCursor.ts";
 import type { User } from "./types/User.ts";
-import type Konva from "konva";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User>();
@@ -26,8 +26,8 @@ function App() {
   const [redoStack, setRedoStack] = useState<Command[]>([]);
   const [isNewRoomModalOpen, setIsNewRoomModalOpen] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  // const [currentShape, setCurrentShape] = useState("freehand");
   const roomId = searchParams.get("room");
-  const stageRef = useRef<Konva.Stage | null>(null);
 
   // initialize the user
   useEffect(() => {
@@ -253,19 +253,18 @@ function App() {
   }
 
   function handleSaveBoard() {
-    if (stageRef.current) {
-      const options = {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          roomId,
-          ownerId: currentUser?.userId,
-          board: stageRef.current,
-        }),
-      };
-
-      fetch(`${import.meta.env.VITE_SOCKET_SERVER_ADDRESS}/room`, options);
-    }
+    // if (stageRef.current) {
+    //   const options = {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify({
+    //       roomId,
+    //       ownerId: currentUser?.userId,
+    //       board: stageRef.current,
+    //     }),
+    //   };
+    //   fetch(`${import.meta.env.VITE_SOCKET_SERVER_ADDRESS}/room`, options);
+    // }
   }
 
   return (
@@ -321,15 +320,17 @@ function App() {
         </NavLink>
       )}
 
+      <ShapeSelectorBar />
+
       <Stage
         width={window.innerWidth}
         height={window.innerHeight}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
-        ref={stageRef}
       >
         <Layer>
+          <Circle x={200} y={100} radius={50} fill="green" />
           {isDrawing && <Line points={line?.points} stroke="black" />}
           {lines.map((line) => (
             <Line

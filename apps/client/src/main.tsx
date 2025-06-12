@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
+import { SelectedShapeProvider } from "./contexts/SelectedShapeContext.tsx";
 
 const router = createBrowserRouter([
   {
@@ -17,7 +18,9 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <SelectedShapeProvider>
+      <RouterProvider router={router} />
+    </SelectedShapeProvider>
     {/* <App /> */}
   </StrictMode>
 );
