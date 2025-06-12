@@ -28,12 +28,15 @@ io.on('connection', (socket) => {
 
   socket.on('command', (data) => {
     const roomId = data.roomId
+
+    console.log(data, 'waya')
     // socket.broadcast.emit("command", command);
     io.to(roomId).emit('command', data)
   })
 
   socket.on('cursormove', (data) => {
     const { roomId } = data
+    console.log(data, 'move')
 
     io.to(roomId).emit('cursormove', data)
   })
@@ -45,6 +48,6 @@ io.on('connection', (socket) => {
 
 const port = process.env.PORT
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`⚡️[server]: Server is running at <http://localhost>:${port}`)
 })

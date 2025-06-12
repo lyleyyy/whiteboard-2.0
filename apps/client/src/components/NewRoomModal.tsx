@@ -21,7 +21,7 @@ export default function NewRoomModal({ roomId, onClick }: NewRoomModalProps) {
 
   function handleCopy() {
     navigator.clipboard.writeText(
-      `${import.meta.env.VITE_USER_DOMAIN}?room=${roomId}`,
+      `${import.meta.env.VITE_USER_DOMAIN}?room=${roomId}`
     );
 
     setIsCopied(true);

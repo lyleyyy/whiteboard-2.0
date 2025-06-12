@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
 import { DrawLineCommand } from "./commands/DrawLineCommand.ts";
-import type { Command } from "./commands/types";
-import type { LineInterface } from "./types/LineInterface.ts";
-import type { KonvaEventObject } from "konva/lib/Node";
 import { Stage, Layer, Line } from "react-konva";
+import generateGuest from "./utils/guestGenerator.ts";
 import { v4 as uuidv4 } from "uuid";
 import ThemeButton from "./components/ThemeButton.tsx";
 import { NavLink, useSearchParams } from "react-router";
 import { socket } from "./lib/socketClient.ts";
 import NewRoomModal from "./components/NewRoomModal.tsx";
 import SecondaryButton from "./components/SecondaryButton.tsx";
-import type { UserCursor } from "./types/UserCursor.ts";
 import { PiCursorClickDuotone } from "react-icons/pi";
-
-const userId = uuidv4();
-const userName = "Waya";
+import type { Command } from "./commands/types";
+import type { LineInterface } from "./types/LineInterface.ts";
+import type { KonvaEventObject } from "konva/lib/Node";
+import type { UserCursor } from "./types/UserCursor.ts";
+import type { User } from "./types/User.ts";
 
 function App() {
+  const [currentUser, setCurrentUser] = useState<User>();
   const [isDrawing, setIsDrawing] = useState(false);
   const [line, setLine] = useState<LineInterface | null>(null);
   const [lines, setLines] = useState<LineInterface[]>([]);
@@ -28,6 +28,20 @@ function App() {
   const roomId = searchParams.get("room");
 
   useEffect(() => {
+    const owner = localStorage.getItem("whiteboard_owner");
+    console.log(owner);
+
+    if (!owner) {
+      const guest = generateGuest();
+      localStorage.setItem("whiteboard_guest", JSON.stringify(guest));
+
+      setCurrentUser(guest);
+    } else {
+      setCurrentUser(JSON.parse(owner));
+    }
+  }, []);
+
+  useEffect(() => {
     if (searchParams) {
       // console.log(`I am in room ${roomId}`);
       socket.emit("joinroom", roomId);
@@ -37,6 +51,8 @@ function App() {
   // undo redo
   useEffect(() => {
     function undoRedo(e: KeyboardEvent) {
+      if (!currentUser) return;
+
       if (e.key === "z" && e.metaKey) {
         // redo
         if (e.shiftKey) {
@@ -53,7 +69,7 @@ function App() {
                   shape: "line",
                   command: redoCommand,
                   roomId,
-                  userId,
+                  userId: currentUser.userId,
                 });
               }
             }
@@ -73,7 +89,7 @@ function App() {
                   shape: "line",
                   command: undoCommand,
                   roomId,
-                  userId,
+                  userId: currentUser.userId,
                 });
               }
             }
@@ -97,7 +113,7 @@ function App() {
       window.removeEventListener("keydown", undoRedo);
       window.removeEventListener("keydown", test);
     };
-  }, [undoStack, redoStack, lines, roomId]);
+  }, [undoStack, redoStack, lines, roomId, currentUser]);
 
   // socket listener
   useEffect(() => {
@@ -108,7 +124,7 @@ function App() {
       // testing
       console.log(data.userId, "data.userId");
       // this is where the bug happened, the local undo delete the line, but in the event loop it not yet re-render, and then this emit command undo happen, the lines state is the same as the one just deleted line, so the state is not change, so the line has been deleted from the lines, but the re-render is not triggered? But why only happend when another user draw something
-      if (data.userId === userId) return;
+      if (data.userId === currentUser?.userId) return;
 
       if (data.type === "draw") {
         if (data.shape === "line") {
@@ -136,7 +152,9 @@ function App() {
     });
 
     socket.on("cursormove", (data) => {
-      const { newCoord, userId } = data;
+      const { newCoord, userId, userName } = data;
+      if (!currentUser || userId === currentUser.userId) return;
+
       setOtherUserCursors((prev) => [
         ...prev.filter((otherUserCursor) => otherUserCursor.userId !== userId),
         { userId, coord: newCoord, userName },
@@ -147,10 +165,12 @@ function App() {
       socket.off("command");
       socket.off("cursormove");
     };
-  }, [roomId]);
+  }, [roomId, currentUser]);
 
-  function handleMouseDown() {
-    setIsDrawing(true);
+  function handleMouseDown(e: KonvaEventObject<MouseEvent>) {
+    if (e.evt.button === 0) {
+      setIsDrawing(true);
+    }
   }
 
   function handleMouseUp() {
@@ -165,8 +185,18 @@ function App() {
   }
 
   function handleMouseMove(e: KonvaEventObject<MouseEvent>) {
+    if (!currentUser) return;
+
     const newCoord = e.target.getStage()?.getPointerPosition();
     if (!newCoord) return;
+
+    // mouse move cursor
+    socket.emit("cursormove", {
+      newCoord,
+      roomId,
+      userId: currentUser.userId,
+      userName: currentUser.username,
+    });
 
     if (isDrawing) {
       const newLine = {
@@ -180,25 +210,18 @@ function App() {
 
       // socket io emits event
       // socket.emit("drawline", newLine);
+
       if (roomId) {
         socket.emit("command", {
           type: "draw",
           shape: "line",
           line: newLine,
           roomId,
-          userId,
+          userId: currentUser.userId,
         });
       }
       // throttledEmit(newLine);
     }
-
-    // mouse move cursor
-    socket.emit("cursormove", {
-      newCoord,
-      roomId,
-      userId,
-      userName,
-    });
   }
 
   function handleNewRoom(e: React.MouseEvent<HTMLButtonElement>) {
@@ -217,7 +240,7 @@ function App() {
       {otherUserCursors.length !== 0 &&
         otherUserCursors.map((userCursor) => {
           const { coord, userName } = userCursor;
-          if (userId !== userCursor.userId) {
+          if (currentUser?.userId !== userCursor.userId) {
             const { x, y } = coord;
 
             return (
