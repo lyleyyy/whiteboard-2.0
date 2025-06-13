@@ -23,6 +23,7 @@ import { useSelectedColor } from "./contexts/SelectedColorContext.tsx";
 function App() {
   const [currentUser, setCurrentUser] = useState<User>();
   const [isDrawing, setIsDrawing] = useState(false);
+  // const [isErasing, setIsEarsing] = useState(false);
   const [line, setLine] = useState<LineInterface | null>(null);
   const [lines, setLines] = useState<LineInterface[]>([]);
   const [otherUserCursors, setOtherUserCursors] = useState<UserCursor[]>([]);
@@ -31,7 +32,7 @@ function App() {
   const [isNewRoomModalOpen, setIsNewRoomModalOpen] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const { selectedShape } = useSelectedShape();
-  const { selectedColor } = useSelectedColor();
+  const { selectedColor, setSelectedColor } = useSelectedColor();
   const roomId = searchParams.get("room");
 
   // initialize the user
@@ -56,6 +57,7 @@ function App() {
       const params = new URLSearchParams({
         roomId,
         // ownerId: currentUser.userId,
+        // ownerId is hard coded
         ownerId: "lyleyyy",
       });
 
@@ -69,7 +71,7 @@ function App() {
 
       const res = await fetch(url, options);
       const data = await res.json();
-      setLines(data);
+      if (data) setLines(data);
     }
 
     if (roomId) getRoomData();
@@ -203,19 +205,11 @@ function App() {
   function handleMouseDown(e: KonvaEventObject<MouseEvent>) {
     if (e.evt.button === 0) {
       if (selectedShape === "pencil") setIsDrawing(true);
+      if (selectedShape === "eraser") {
+        setIsDrawing(true);
+        setSelectedColor("white");
+      }
     }
-  }
-
-  function handleMouseUp() {
-    setIsDrawing(false);
-    if (line !== null) {
-      setLines((prev) => [...prev, line]);
-      const drawLineCommand = new DrawLineCommand(line, setLines);
-      setUndoStack((prev) => [...prev, drawLineCommand]);
-      setRedoStack([]);
-    }
-
-    setLine(null);
   }
 
   function handleMouseMove(e: KonvaEventObject<MouseEvent>) {
@@ -237,7 +231,7 @@ function App() {
         id: line?.id || uuidv4(),
         points: [...(line?.points ?? []), newCoord.x, newCoord.y],
         stroke: selectedColor,
-        strokeWidth: 2,
+        strokeWidth: selectedColor === "white" ? 40 : 4,
       };
 
       setLine(newLine);
@@ -256,6 +250,19 @@ function App() {
       }
       // throttledEmit(newLine);
     }
+  }
+
+  function handleMouseUp() {
+    setIsDrawing(false);
+    // setIsEarsing(false);
+    if (line !== null) {
+      setLines((prev) => [...prev, line]);
+      const drawLineCommand = new DrawLineCommand(line, setLines);
+      setUndoStack((prev) => [...prev, drawLineCommand]);
+      setRedoStack([]);
+    }
+
+    setLine(null);
   }
 
   async function handleNewRoom(e: React.MouseEvent<HTMLButtonElement>) {
@@ -376,15 +383,22 @@ function App() {
       >
         <Layer>
           {/* <Circle x={200} y={100} radius={50} fill="green" /> */}
-          {isDrawing && <Line points={line?.points} stroke={selectedColor} />}
           {lines.map((line) => (
             <Line
               key={line.id}
               points={line.points}
               stroke={line.stroke}
               strokeWidth={line.strokeWidth}
+              draggable={selectedShape === "cursor"}
             />
           ))}
+          {isDrawing && (
+            <Line
+              points={line?.points}
+              stroke={selectedColor}
+              strokeWidth={selectedColor === "white" ? 40 : 4}
+            />
+          )}
         </Layer>
       </Stage>
     </>
