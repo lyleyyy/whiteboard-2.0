@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import { createServer } from 'http'
 import cors from 'cors'
 import { Server } from 'socket.io'
-import { create } from '../data/room.repository'
+import { create, loadBoard, updateBoard } from '../data/room.repository'
 dotenv.config()
 
 const app: Express = express()
@@ -32,6 +32,30 @@ app.post('/room', async (req: Request, res: Response) => {
   }
 })
 
+app.get('/roomdata', async (req: Request, res: Response) => {
+  const { roomId, ownerId } = req.query
+
+  if (typeof roomId !== 'string' || typeof ownerId !== 'string') return
+
+  try {
+    const data = await loadBoard(roomId, ownerId)
+    if (data) res.status(200).json(data[0].stage_lines)
+  } catch (err) {
+    res.status(500).json({ message: 'Internal Error' })
+  }
+})
+
+app.post('/roomsave', async (req: Request, res: Response) => {
+  const { roomId, ownerId, boardLines } = req.body
+
+  try {
+    const data = await updateBoard(roomId, ownerId, boardLines)
+    if (data) res.status(200).json({ message: 'Board status just saved...' })
+  } catch (err) {
+    res.status(500).json({ message: 'Internal Error' })
+  }
+})
+
 io.on('connection', (socket) => {
   // ...
   console.log(`🟢 User connected: ${socket.id}`)
@@ -43,7 +67,7 @@ io.on('connection', (socket) => {
   socket.on('command', (data) => {
     const roomId = data.roomId
 
-    console.log(data, 'waya')
+    // console.log(data, 'waya')
     // socket.broadcast.emit("command", command);
     io.to(roomId).emit('command', data)
   })

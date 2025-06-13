@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Stage, Layer, Line, Circle } from "react-konva";
+import { Stage, Layer, Line } from "react-konva";
 import { NavLink, useSearchParams } from "react-router";
 import { v4 as uuidv4 } from "uuid";
+import toast, { Toaster } from "react-hot-toast";
 import { PiCursorClickDuotone } from "react-icons/pi";
 import { socket } from "./lib/socketClient.ts";
 import generateGuest from "./utils/guestGenerator.ts";
@@ -15,6 +16,7 @@ import type { LineInterface } from "./types/LineInterface.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { UserCursor } from "./types/UserCursor.ts";
 import type { User } from "./types/User.ts";
+import { useSelectedShape } from "./contexts/SelectedShapeContext.tsx";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User>();
@@ -26,7 +28,7 @@ function App() {
   const [redoStack, setRedoStack] = useState<Command[]>([]);
   const [isNewRoomModalOpen, setIsNewRoomModalOpen] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  // const [currentShape, setCurrentShape] = useState("freehand");
+  const { selectedShape } = useSelectedShape();
   const roomId = searchParams.get("room");
 
   // initialize the user
@@ -42,6 +44,32 @@ function App() {
       setCurrentUser(JSON.parse(owner));
     }
   }, []);
+
+  // load room board saved status
+  useEffect(() => {
+    async function getRoomData() {
+      if (!roomId || !currentUser) return;
+
+      const params = new URLSearchParams({
+        roomId,
+        ownerId: currentUser.userId,
+      });
+
+      const url = `${import.meta.env.VITE_SOCKET_SERVER_ADDRESS}/roomdata?${params.toString()}`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      const res = await fetch(url, options);
+      const data = await res.json();
+      setLines(data);
+    }
+
+    if (roomId) getRoomData();
+  }, [roomId, currentUser]);
 
   // if there is params of roomId in the url, join the room
   useEffect(() => {
@@ -170,7 +198,7 @@ function App() {
 
   function handleMouseDown(e: KonvaEventObject<MouseEvent>) {
     if (e.evt.button === 0) {
-      setIsDrawing(true);
+      if (selectedShape === "pencil") setIsDrawing(true);
     }
   }
 
@@ -252,23 +280,34 @@ function App() {
     }
   }
 
-  function handleSaveBoard() {
-    // if (stageRef.current) {
-    //   const options = {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({
-    //       roomId,
-    //       ownerId: currentUser?.userId,
-    //       board: stageRef.current,
-    //     }),
-    //   };
-    //   fetch(`${import.meta.env.VITE_SOCKET_SERVER_ADDRESS}/room`, options);
-    // }
+  async function handleSaveBoard() {
+    // if (!currentUser || currentUser.role !== "owner" || !roomId) return;
+    if (!currentUser || currentUser.role !== "owner") return;
+
+    const options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        roomId,
+        ownerId: currentUser.userId,
+        boardLines: lines,
+      }),
+    };
+
+    const res = await fetch(
+      `${import.meta.env.VITE_SOCKET_SERVER_ADDRESS}/roomsave`,
+      options
+    );
+
+    const data = await res.json();
+    if (data) {
+      toast.success("Board content is saved.");
+    }
   }
 
   return (
     <>
+      <Toaster />
       {currentUser &&
         otherUserCursors.length !== 0 &&
         otherUserCursors.map((userCursor) => {
@@ -288,6 +327,7 @@ function App() {
             );
           }
         })}
+
       {isNewRoomModalOpen && roomId && (
         <NewRoomModal
           roomId={roomId}
@@ -295,7 +335,7 @@ function App() {
         />
       )}
 
-      {currentUser && currentUser.role === "owner" && (
+      {currentUser && currentUser.role === "owner" && roomId && (
         <ThemeButton
           positionCss="absolute right-40 top-5"
           buttonName="Save"
@@ -330,7 +370,7 @@ function App() {
         onMouseMove={handleMouseMove}
       >
         <Layer>
-          <Circle x={200} y={100} radius={50} fill="green" />
+          {/* <Circle x={200} y={100} radius={50} fill="green" /> */}
           {isDrawing && <Line points={line?.points} stroke="black" />}
           {lines.map((line) => (
             <Line
