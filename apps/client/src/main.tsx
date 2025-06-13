@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { SelectedShapeProvider } from "./contexts/SelectedShapeContext.tsx";
+import { SelectedColorProvider } from "./contexts/SelectedColorContext.tsx";
 
 const router = createBrowserRouter([
   {
@@ -18,9 +19,11 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <SelectedShapeProvider>
-      <RouterProvider router={router} />
-    </SelectedShapeProvider>
+    <SelectedColorProvider>
+      <SelectedShapeProvider>
+        <RouterProvider router={router} />
+      </SelectedShapeProvider>
+    </SelectedColorProvider>
     {/* <App /> */}
   </StrictMode>
 );

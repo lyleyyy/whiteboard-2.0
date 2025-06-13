@@ -17,6 +17,8 @@ import type { KonvaEventObject } from "konva/lib/Node";
 import type { UserCursor } from "./types/UserCursor.ts";
 import type { User } from "./types/User.ts";
 import { useSelectedShape } from "./contexts/SelectedShapeContext.tsx";
+import Palette from "./components/palette.tsx";
+import { useSelectedColor } from "./contexts/SelectedColorContext.tsx";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User>();
@@ -29,6 +31,7 @@ function App() {
   const [isNewRoomModalOpen, setIsNewRoomModalOpen] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const { selectedShape } = useSelectedShape();
+  const { selectedColor } = useSelectedColor();
   const roomId = searchParams.get("room");
 
   // initialize the user
@@ -52,7 +55,8 @@ function App() {
 
       const params = new URLSearchParams({
         roomId,
-        ownerId: currentUser.userId,
+        // ownerId: currentUser.userId,
+        ownerId: "lyleyyy",
       });
 
       const url = `${import.meta.env.VITE_SOCKET_SERVER_ADDRESS}/roomdata?${params.toString()}`;
@@ -204,13 +208,14 @@ function App() {
 
   function handleMouseUp() {
     setIsDrawing(false);
-    if (line !== null) setLines((prev) => [...prev, line]);
-    setLine(null);
     if (line !== null) {
+      setLines((prev) => [...prev, line]);
       const drawLineCommand = new DrawLineCommand(line, setLines);
       setUndoStack((prev) => [...prev, drawLineCommand]);
       setRedoStack([]);
     }
+
+    setLine(null);
   }
 
   function handleMouseMove(e: KonvaEventObject<MouseEvent>) {
@@ -231,7 +236,7 @@ function App() {
       const newLine = {
         id: line?.id || uuidv4(),
         points: [...(line?.points ?? []), newCoord.x, newCoord.y],
-        stroke: "blacks",
+        stroke: selectedColor,
         strokeWidth: 2,
       };
 
@@ -308,6 +313,8 @@ function App() {
   return (
     <>
       <Toaster />
+      <ShapeSelectorBar />
+      <Palette />
       {currentUser &&
         otherUserCursors.length !== 0 &&
         otherUserCursors.map((userCursor) => {
@@ -360,8 +367,6 @@ function App() {
         </NavLink>
       )}
 
-      <ShapeSelectorBar />
-
       <Stage
         width={window.innerWidth}
         height={window.innerHeight}
@@ -371,7 +376,7 @@ function App() {
       >
         <Layer>
           {/* <Circle x={200} y={100} radius={50} fill="green" /> */}
-          {isDrawing && <Line points={line?.points} stroke="black" />}
+          {isDrawing && <Line points={line?.points} stroke={selectedColor} />}
           {lines.map((line) => (
             <Line
               key={line.id}
