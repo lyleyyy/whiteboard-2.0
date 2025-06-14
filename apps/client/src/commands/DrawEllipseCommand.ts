@@ -28,7 +28,7 @@ export class DrawEllipseCommand implements DrawCommand {
 
   undo() {
     this.setEllipses((prev) =>
-      prev.filter((ellipse) => ellipse.id !== ellipse.id)
+      prev.filter((ellipse) => ellipse.id !== this.ellipse.id)
     );
   }
 }
