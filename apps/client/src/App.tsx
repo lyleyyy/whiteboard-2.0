@@ -22,6 +22,7 @@ import type { EllipseInterface } from "./types/EllipseInterface.ts";
 import { useSelectedShape } from "./contexts/SelectedShapeContext.tsx";
 import { useSelectedColor } from "./contexts/SelectedColorContext.tsx";
 import ellipseParametersCalculator from "./utils/ellipseParametersCalculator.ts";
+import { DrawEllipseCommand } from "./commands/DrawEllipseCommand.ts";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User>();
@@ -282,7 +283,12 @@ function App() {
       const { startCoords, endCoords } = ellipseRaw;
 
       const data = ellipseParametersCalculator(startCoords, endCoords);
-      setEllipse(data);
+      setEllipse({
+        ...data,
+        id: uuidv4(),
+        stroke: selectedColor,
+        strokeWidth: 2,
+      });
     }
   }
 
@@ -305,9 +311,9 @@ function App() {
 
       if (ellipse) {
         setEllipses((prev) => [...prev, ellipse]);
-        // const drawLineCommand = new DrawLineCommand(ellipse, setEllipses);
-        // setUndoStack((prev) => [...prev, drawLineCommand]);
-        // setRedoStack([]);
+        const drawEllipseCommand = new DrawEllipseCommand(ellipse, setEllipses);
+        setUndoStack((prev) => [...prev, drawEllipseCommand]);
+        setRedoStack([]);
       }
 
       setEllipseRaw(null);
@@ -447,8 +453,9 @@ function App() {
               y={ellipse.y}
               radiusX={ellipse.radiusX}
               radiusY={ellipse.radiusY}
-              stroke="green"
-              strokeWidth={2}
+              stroke={ellipse.stroke}
+              strokeWidth={ellipse.strokeWidth}
+              draggable={selectedShape === "cursor"}
             />
           ))}
           {isDrawing && (
@@ -464,8 +471,8 @@ function App() {
               y={ellipse.y}
               radiusX={ellipse.radiusX}
               radiusY={ellipse.radiusY}
-              stroke="green"
-              strokeWidth={2}
+              stroke={ellipse.stroke}
+              strokeWidth={ellipse.strokeWidth}
             />
           )}
         </Layer>

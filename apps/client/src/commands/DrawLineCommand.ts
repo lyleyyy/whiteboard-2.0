@@ -12,7 +12,7 @@ export class DrawLineCommand implements DrawCommand {
 
   constructor(
     line: LineInterface,
-    setLines: Dispatch<SetStateAction<LineInterface[]>>,
+    setLines: Dispatch<SetStateAction<LineInterface[]>>
   ) {
     this.line = line;
     this.setLines = setLines;

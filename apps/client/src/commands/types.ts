@@ -5,7 +5,7 @@ export interface Command {
 }
 
 export interface DrawCommand extends Command {
-  shape: "line" | "rect" | "text";
+  shape: "line" | "rect" | "text" | "ellipse";
   targetShapeId: string;
 }
 
