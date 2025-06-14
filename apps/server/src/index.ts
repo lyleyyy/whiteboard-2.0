@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 import { createServer } from 'http'
 import cors from 'cors'
 import { Server } from 'socket.io'
-import { create, loadBoard, updateBoard } from '../data/room.repository'
+import { create, loadBoard, updateBoard } from './data/room.repository'
 dotenv.config()
 
 const app: Express = express()

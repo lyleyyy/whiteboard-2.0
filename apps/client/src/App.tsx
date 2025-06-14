@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Stage, Layer, Line } from "react-konva";
+import { Stage, Layer, Line, Ellipse } from "react-konva";
 import { NavLink, useSearchParams } from "react-router";
 import { v4 as uuidv4 } from "uuid";
 import toast, { Toaster } from "react-hot-toast";
@@ -10,22 +10,30 @@ import ThemeButton from "./components/ThemeButton.tsx";
 import NewRoomModal from "./components/NewRoomModal.tsx";
 import SecondaryButton from "./components/SecondaryButton.tsx";
 import ShapeSelectorBar from "./components/ShapeSelectorBar.tsx";
+import Palette from "./components/Palette.tsx";
 import { DrawLineCommand } from "./commands/DrawLineCommand.ts";
 import type { Command } from "./commands/types";
 import type { LineInterface } from "./types/LineInterface.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { UserCursor } from "./types/UserCursor.ts";
 import type { User } from "./types/User.ts";
+import type { EllipseRawInterface } from "./types/EllipseRawInterface.ts";
+import type { EllipseInterface } from "./types/EllipseInterface.ts";
 import { useSelectedShape } from "./contexts/SelectedShapeContext.tsx";
-import Palette from "./components/palette.tsx";
 import { useSelectedColor } from "./contexts/SelectedColorContext.tsx";
+import ellipseParametersCalculator from "./utils/ellipseParametersCalculator.ts";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User>();
   const [isDrawing, setIsDrawing] = useState(false);
-  // const [isErasing, setIsEarsing] = useState(false);
+  const [isEllisping, setIsEllisping] = useState(false);
   const [line, setLine] = useState<LineInterface | null>(null);
   const [lines, setLines] = useState<LineInterface[]>([]);
+  const [ellipseRaw, setEllipseRaw] = useState<EllipseRawInterface | null>(
+    null
+  );
+  const [ellipse, setEllipse] = useState<EllipseInterface | null>(null);
+  const [ellipses, setEllipses] = useState<EllipseInterface[]>([]);
   const [otherUserCursors, setOtherUserCursors] = useState<UserCursor[]>([]);
   const [undoStack, setUndoStack] = useState<Command[]>([]);
   const [redoStack, setRedoStack] = useState<Command[]>([]);
@@ -209,6 +217,17 @@ function App() {
         setIsDrawing(true);
         setSelectedColor("white");
       }
+      if (selectedShape === "circle") {
+        setIsEllisping(true);
+
+        const newCoord = e.target.getStage()!.getPointerPosition()!;
+        const newEllispe = {
+          startCoords: newCoord,
+          endCoords: null,
+        };
+
+        setEllipseRaw(newEllispe);
+      }
     }
   }
 
@@ -250,19 +269,50 @@ function App() {
       }
       // throttledEmit(newLine);
     }
+
+    if (isEllisping) {
+      setEllipseRaw((prev) => {
+        if (!prev) return null;
+        return { startCoords: prev.startCoords, endCoords: newCoord };
+      });
+
+      console.log(ellipseRaw);
+
+      if (!ellipseRaw || !ellipseRaw.endCoords) return;
+      const { startCoords, endCoords } = ellipseRaw;
+
+      const data = ellipseParametersCalculator(startCoords, endCoords);
+      setEllipse(data);
+    }
   }
 
   function handleMouseUp() {
-    setIsDrawing(false);
-    // setIsEarsing(false);
-    if (line !== null) {
-      setLines((prev) => [...prev, line]);
-      const drawLineCommand = new DrawLineCommand(line, setLines);
-      setUndoStack((prev) => [...prev, drawLineCommand]);
-      setRedoStack([]);
+    if (selectedShape === "pencil" || selectedShape === "eraser") {
+      setIsDrawing(false);
+      // setIsEarsing(false);
+      if (line) {
+        setLines((prev) => [...prev, line]);
+        const drawLineCommand = new DrawLineCommand(line, setLines);
+        setUndoStack((prev) => [...prev, drawLineCommand]);
+        setRedoStack([]);
+      }
+
+      setLine(null);
     }
 
-    setLine(null);
+    if (selectedShape === "circle") {
+      setIsEllisping(false);
+
+      if (ellipse) {
+        setEllipses((prev) => [...prev, ellipse]);
+        // const drawLineCommand = new DrawLineCommand(ellipse, setEllipses);
+        // setUndoStack((prev) => [...prev, drawLineCommand]);
+        // setRedoStack([]);
+      }
+
+      setEllipseRaw(null);
+      setEllipse(null);
+    }
   }
 
   async function handleNewRoom(e: React.MouseEvent<HTMLButtonElement>) {
@@ -382,7 +432,6 @@ function App() {
         onMouseMove={handleMouseMove}
       >
         <Layer>
-          {/* <Circle x={200} y={100} radius={50} fill="green" /> */}
           {lines.map((line) => (
             <Line
               key={line.id}
@@ -392,11 +441,31 @@ function App() {
               draggable={selectedShape === "cursor"}
             />
           ))}
+          {ellipses.map((ellipse) => (
+            <Ellipse
+              x={ellipse.x}
+              y={ellipse.y}
+              radiusX={ellipse.radiusX}
+              radiusY={ellipse.radiusY}
+              stroke="green"
+              strokeWidth={2}
+            />
+          ))}
           {isDrawing && (
             <Line
               points={line?.points}
               stroke={selectedColor}
               strokeWidth={selectedColor === "white" ? 40 : 4}
+            />
+          )}
+          {isEllisping && ellipse && (
+            <Ellipse
+              x={ellipse.x}
+              y={ellipse.y}
+              radiusX={ellipse.radiusX}
+              radiusY={ellipse.radiusY}
+              stroke="green"
+              strokeWidth={2}
             />
           )}
         </Layer>
