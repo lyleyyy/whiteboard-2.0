@@ -43,7 +43,7 @@ cd apps/server
 yarn
 ```
 
-### 2. Run Development Servers
+### 2. Run Development Apps
 
 Frontend:
 
@@ -59,10 +59,9 @@ cd apps/server
 yarn dev
 ```
 
-Or run both (via Turborepo) from the monorepo root:
+Or from the project root (where `package.json` and `turbo.json` are):
 
 ```bash
-cd whiteboard-2.0
 yarn dev
 ```
 
