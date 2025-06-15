@@ -17,7 +17,7 @@ A real-time collaborative whiteboard application built with a modern full-stack 
 
 ## 📁 Project Structure
 
-````bash
+```bash
 whiteboard-2.0/
 ├── apps/
 │   ├── client/           # Frontend application (Vite + React)
@@ -30,6 +30,7 @@ whiteboard-2.0/
 └── yarn.lock
 
 ---
+```
 
 ## 🚀 Getting Started
 
@@ -41,7 +42,7 @@ yarn
 
 cd apps/server
 yarn
-````
+```
 
 ### 2. Run Development Apps
 
@@ -164,3 +165,7 @@ Upload `whiteboard-server-deploy.zip` to your Elastic Beanstalk application envi
 
 Full Stack Engineer based in Barcelona
 [LinkedIn](https://www.linkedin.com/in/lyle-yang-b694211b7/)
+
+```
+
+```
