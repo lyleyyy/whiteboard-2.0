@@ -165,7 +165,3 @@ Upload `whiteboard-server-deploy.zip` to your Elastic Beanstalk application envi
 
 Full Stack Engineer based in Barcelona
 [LinkedIn](https://www.linkedin.com/in/lyle-yang-b694211b7/)
-
-```
-
-```
