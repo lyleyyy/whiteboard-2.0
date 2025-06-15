@@ -213,7 +213,7 @@ function App() {
     };
   }, [roomId, currentUser]);
 
-  function handleMouseDown(e: KonvaEventObject<MouseEvent>) {
+  function handleMouseDown(e: KonvaEventObject<PointerEvent>) {
     if (e.evt.button === 0) {
       if (selectedShape === "pencil") setIsDrawing(true);
       if (selectedShape === "eraser") {
@@ -234,7 +234,7 @@ function App() {
     }
   }
 
-  function handleMouseMove(e: KonvaEventObject<MouseEvent>) {
+  function handleMouseMove(e: KonvaEventObject<PointerEvent>) {
     if (!currentUser) return;
 
     const newCoord = e.target.getStage()?.getPointerPosition();
@@ -279,8 +279,6 @@ function App() {
         return { startCoords: prev.startCoords, endCoords: newCoord };
       });
 
-      console.log(ellipseRaw);
-
       if (!ellipseRaw || !ellipseRaw.endCoords) return;
       const { startCoords, endCoords } = ellipseRaw;
 
@@ -312,7 +310,7 @@ function App() {
       setIsEllisping(false);
 
       if (ellipse) {
-        setEllipses((prev) => [...prev, ellipse]);
+        setEllipses((prev) => [...(prev ?? []), ellipse]);
         const drawEllipseCommand = new DrawEllipseCommand(ellipse, setEllipses);
         setUndoStack((prev) => [...prev, drawEllipseCommand]);
         setRedoStack([]);
@@ -436,9 +434,9 @@ function App() {
       <Stage
         width={window.innerWidth}
         height={window.innerHeight}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
+        onPointerDown={handleMouseDown}
+        onPointerUp={handleMouseUp}
+        onPointerMove={handleMouseMove}
       >
         <Layer>
           {ellipses &&
