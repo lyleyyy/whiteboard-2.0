@@ -137,13 +137,13 @@ Upload `whiteboard-server-deploy.zip` to your Elastic Beanstalk application envi
 
 ## ✅ Features
 
-✅ Real-time drawing with Socket.IO
-✅ Room-based collaborative sessions
-✅ WebSocket + RESTful API support
-✅ Supabase integration for persistent storage
-✅ AWS S3 static hosting deployment script
-✅ AWS Elastic Beanstalk deployment script
-✅ Modular monorepo architecture
+- ✅ Real-time drawing with Socket.IO
+- ✅ Room-based collaborative sessions
+- ✅ WebSocket + RESTful API support
+- ✅ Supabase integration for persistent storage
+- ✅ AWS S3 static hosting deployment script
+- ✅ AWS Elastic Beanstalk deployment script
+- ✅ Modular monorepo architecture
 
 ---
 
