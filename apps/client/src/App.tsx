@@ -441,34 +441,29 @@ function App() {
         onMouseMove={handleMouseMove}
       >
         <Layer>
-          {lines.map((line) => (
-            <Line
-              key={line.id}
-              points={line.points}
-              stroke={line.stroke}
-              strokeWidth={line.strokeWidth}
-              draggable={selectedShape === "cursor"}
-            />
-          ))}
-          {ellipses.map((ellipse) => (
-            <Ellipse
-              key={ellipse.id}
-              x={ellipse.x}
-              y={ellipse.y}
-              radiusX={ellipse.radiusX}
-              radiusY={ellipse.radiusY}
-              stroke={ellipse.stroke}
-              strokeWidth={ellipse.strokeWidth}
-              draggable={selectedShape === "cursor"}
-            />
-          ))}
-          {isDrawing && (
-            <Line
-              points={line?.points}
-              stroke={selectedColor}
-              strokeWidth={selectedColor === "white" ? 40 : 4}
-            />
-          )}
+          {ellipses &&
+            ellipses.map((ellipse) => (
+              <Ellipse
+                key={ellipse.id}
+                x={ellipse.x}
+                y={ellipse.y}
+                radiusX={ellipse.radiusX}
+                radiusY={ellipse.radiusY}
+                stroke={ellipse.stroke}
+                strokeWidth={ellipse.strokeWidth}
+                draggable={selectedShape === "cursor"}
+              />
+            ))}
+          {lines &&
+            lines.map((line) => (
+              <Line
+                key={line.id}
+                points={line.points}
+                stroke={line.stroke}
+                strokeWidth={line.strokeWidth}
+                draggable={selectedShape === "cursor"}
+              />
+            ))}
           {isEllisping && ellipse && (
             <Ellipse
               x={ellipse.x}
@@ -477,6 +472,13 @@ function App() {
               radiusY={ellipse.radiusY}
               stroke={ellipse.stroke}
               strokeWidth={ellipse.strokeWidth}
+            />
+          )}
+          {isDrawing && (
+            <Line
+              points={line?.points}
+              stroke={selectedColor}
+              strokeWidth={selectedColor === "white" ? 40 : 4}
             />
           )}
         </Layer>
