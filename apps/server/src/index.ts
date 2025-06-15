@@ -39,17 +39,17 @@ app.get('/roomdata', async (req: Request, res: Response) => {
 
   try {
     const data = await loadBoard(roomId, ownerId)
-    if (data) res.status(200).json(data[0].stage_lines)
+    if (data) res.status(200).json(data[0])
   } catch (err) {
     res.status(500).json({ message: 'Internal Error' })
   }
 })
 
 app.post('/roomsave', async (req: Request, res: Response) => {
-  const { roomId, ownerId, boardLines } = req.body
+  const { roomId, ownerId, boardLines, boardEllipses } = req.body
 
   try {
-    const data = await updateBoard(roomId, ownerId, boardLines)
+    const data = await updateBoard(roomId, ownerId, boardLines, boardEllipses)
     if (data) res.status(200).json({ message: 'Board status just saved...' })
   } catch (err) {
     res.status(500).json({ message: 'Internal Error' })

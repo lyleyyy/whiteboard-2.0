@@ -14,11 +14,12 @@ export async function create(ownerId: string) {
 export async function updateBoard(
   roomId: string,
   ownerId: string,
-  boardLines: string
+  boardLines: string,
+  boardEllipses: string
 ) {
   const { data, error } = await supabase
     .from('rooms')
-    .update({ stage_lines: boardLines })
+    .update({ stage_lines: boardLines, stage_ellipses: boardEllipses })
     .eq('id', roomId)
     .eq('owner_id', ownerId)
     .select()
@@ -31,7 +32,7 @@ export async function updateBoard(
 export async function loadBoard(roomId: string, ownerId: string) {
   const { data, error } = await supabase
     .from('rooms')
-    .select('stage_lines')
+    .select('stage_lines,stage_ellipses')
     .eq('id', roomId)
     .eq('owner_id', ownerId)
 

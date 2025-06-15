@@ -80,7 +80,9 @@ function App() {
 
       const res = await fetch(url, options);
       const data = await res.json();
-      if (data) setLines(data);
+
+      if (data) setLines(data.stage_lines);
+      if (data) setEllipses(data.stage_ellipses);
     }
 
     if (roomId) getRoomData();
@@ -359,6 +361,7 @@ function App() {
         roomId,
         ownerId: currentUser.userId,
         boardLines: lines,
+        boardEllipses: ellipses,
       }),
     };
 
@@ -449,6 +452,7 @@ function App() {
           ))}
           {ellipses.map((ellipse) => (
             <Ellipse
+              key={ellipse.id}
               x={ellipse.x}
               y={ellipse.y}
               radiusX={ellipse.radiusX}
