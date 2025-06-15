@@ -299,7 +299,7 @@ function App() {
       setIsDrawing(false);
       // setIsEarsing(false);
       if (line) {
-        setLines((prev) => [...prev, line]);
+        setLines((prev) => [...(prev ?? []), line]);
         const drawLineCommand = new DrawLineCommand(line, setLines);
         setUndoStack((prev) => [...prev, drawLineCommand]);
         setRedoStack([]);
