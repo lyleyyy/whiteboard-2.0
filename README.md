@@ -10,7 +10,7 @@ A real-time collaborative whiteboard application built with a modern full-stack 
 - **Frontend**: React, Vite, Tailwind CSS, Konva, TypeScript, Socket.IO
 - **Backend**: Node.js, Express, TypeScript, Socket.IO
 - **Deployment**:
-  - **Client**: ✅ **AWS S3 (Static Hosting)**
+  - **Client**: ✅ **AWS S3 (Static Hosting) + CloudFront**
   - **Server**: ✅ **AWS Elastic Beanstalk**
 
 ---
