@@ -11,7 +11,7 @@ import SecondaryButton from "./components/SecondaryButton.tsx";
 import ShapeSelectorBar from "./components/ShapeSelectorBar.tsx";
 import Palette from "./components/Palette.tsx";
 import { DrawLineCommand } from "./commands/DrawLineCommand.ts";
-import type { Command } from "./commands/types";
+import type { DrawCommand } from "./commands/types";
 import type { LineInterface } from "./types/LineInterface.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { UserCursor } from "./types/UserCursor.ts";
@@ -42,8 +42,8 @@ function App() {
   const [ellipse, setEllipse] = useState<EllipseInterface | null>(null);
   const [ellipses, setEllipses] = useState<EllipseInterface[]>([]);
   const [otherUserCursors, setOtherUserCursors] = useState<UserCursor[]>([]);
-  const [undoStack, setUndoStack] = useState<Command[]>([]);
-  const [redoStack, setRedoStack] = useState<Command[]>([]);
+  const [undoStack, setUndoStack] = useState<DrawCommand[]>([]);
+  const [redoStack, setRedoStack] = useState<DrawCommand[]>([]);
   const [isNewRoomModalOpen, setIsNewRoomModalOpen] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [isRoomOwner, setIsRoomOwner] = useState(false);
@@ -144,7 +144,7 @@ function App() {
               if (roomId) {
                 socket.emit("command", {
                   type: "redo",
-                  shape: "line",
+                  shape: redoCommand.shape,
                   command: redoCommand,
                   roomId,
                   userId: currentUser.id,
@@ -164,7 +164,7 @@ function App() {
               if (roomId) {
                 socket.emit("command", {
                   type: "undo",
-                  shape: "line",
+                  shape: undoCommand.shape,
                   command: undoCommand,
                   roomId,
                   userId: currentUser.id,
@@ -227,12 +227,24 @@ function App() {
           const { targetShapeId } = data.command;
           setLines((prev) => prev.filter((line) => line.id !== targetShapeId));
         }
+
+        if (data.command.shape === "ellipse") {
+          const { targetShapeId } = data.command;
+          setEllipses((prev) =>
+            prev.filter((ellipse) => ellipse.id !== targetShapeId)
+          );
+        }
       }
 
       if (data.type === "redo") {
         if (data.command.shape === "line") {
           const { line } = data.command;
           setLines((prev) => [...prev, line]);
+        }
+
+        if (data.command.shape === "ellipse") {
+          const { ellipse } = data.command;
+          setEllipses((prev) => [...prev, ellipse]);
         }
       }
     });
