@@ -213,7 +213,6 @@ function App() {
         }
 
         if (data.shape === "ellipse") {
-          console.log(data, "hmm?????");
           const { ellipse } = data;
           setEllipses((prev) => [
             ...prev.filter((drawedEllipse) => drawedEllipse.id !== ellipse.id),
@@ -251,7 +250,7 @@ function App() {
 
     socket.on("cursormove", (data) => {
       const { newCoord, userId, userName } = data;
-      if (!currentUser || userId === currentUser.id) return;
+      if (!currentUser || userId === currentUser.id || !roomId) return;
 
       setOtherUserCursors((prev) => [
         ...prev.filter((otherUserCursor) => otherUserCursor.userId !== userId),
@@ -287,7 +286,7 @@ function App() {
   }
 
   function handleMouseMove(e: KonvaEventObject<PointerEvent>) {
-    if (!currentUser) return;
+    if (!currentUser || !roomId) return;
 
     const newCoord = e.target.getStage()?.getPointerPosition();
     if (!newCoord) return;
@@ -445,8 +444,9 @@ function App() {
       {currentUser && <UserDisplayer username={currentUser.user_name} />}
       {!currentUser && <FakeLoginModal setCurrentUser={setCurrentUser} />}
 
-      {currentUser &&
-        otherUserCursors.length !== 0 &&
+      {roomId &&
+        currentUser &&
+        otherUserCursors.length > 0 &&
         otherUserCursors.map((userCursor) => {
           const { coord, userName } = userCursor;
           if (currentUser.id !== userCursor.userId) {
