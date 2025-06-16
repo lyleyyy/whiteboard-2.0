@@ -117,10 +117,10 @@
     "outDir": "./dist",
     "moduleResolution": "node",
     "rootDirs": ["node_modules", "test"],
-    "typeRoots": ["node_modules/@types", "types"],
+    "typeRoots": ["node_modules/@types", "src/types"],
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["src/**/*", "test/**/*", "types/**/*"],
+  "include": ["src/**/*", "test/**/*", "src/types/**/*"],
   "exclude": ["node_modules", ".vscode"]
 }

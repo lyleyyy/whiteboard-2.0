@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from "uuid";
 import toast, { Toaster } from "react-hot-toast";
 import { PiCursorClickDuotone } from "react-icons/pi";
 import { socket } from "./lib/socketClient.ts";
-import generateGuest from "./utils/guestGenerator.ts";
 import ThemeButton from "./components/ThemeButton.tsx";
 import NewRoomModal from "./components/NewRoomModal.tsx";
 import SecondaryButton from "./components/SecondaryButton.tsx";
@@ -23,6 +22,12 @@ import { useSelectedShape } from "./contexts/SelectedShapeContext.tsx";
 import { useSelectedColor } from "./contexts/SelectedColorContext.tsx";
 import ellipseParametersCalculator from "./utils/ellipseParametersCalculator.ts";
 import { DrawEllipseCommand } from "./commands/DrawEllipseCommand.ts";
+import FakeLoginModal from "./components/FakeLoginModal.tsx";
+
+const baseUrl =
+  import.meta.env.PRODUCTION === "1"
+    ? import.meta.env.VITE_SOCKET_SERVER_ADDRESS_PRODUCTION
+    : import.meta.env.VITE_SOCKET_SERVER_ADDRESS_DEV;
 
 function App() {
   const [currentUser, setCurrentUser] = useState<User>();
@@ -40,23 +45,49 @@ function App() {
   const [redoStack, setRedoStack] = useState<Command[]>([]);
   const [isNewRoomModalOpen, setIsNewRoomModalOpen] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isRoomOwner, setIsRoomOwner] = useState(false);
   const { selectedShape } = useSelectedShape();
   const { selectedColor, setSelectedColor } = useSelectedColor();
   const roomId = searchParams.get("room");
 
   // initialize the user
+  // useEffect(() => {
+  //   const owner = localStorage.getItem("whiteboard_owner");
+
+  //   if (!owner) {
+  //     const guest = generateGuest();
+  //     localStorage.setItem("whiteboard_guest", JSON.stringify(guest));
+
+  //     setCurrentUser(guest);
+  //   } else {
+  //     setCurrentUser(JSON.parse(owner));
+  //   }
+  // }, []);
+
+  // if current user is owner
   useEffect(() => {
-    const owner = localStorage.getItem("whiteboard_owner");
+    async function getRoom() {
+      if (!roomId || !currentUser) return;
 
-    if (!owner) {
-      const guest = generateGuest();
-      localStorage.setItem("whiteboard_guest", JSON.stringify(guest));
+      const params = new URLSearchParams({
+        userId: currentUser.id,
+      });
 
-      setCurrentUser(guest);
-    } else {
-      setCurrentUser(JSON.parse(owner));
+      const url = `${baseUrl}/room?${params.toString()}`;
+
+      const options = {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      };
+
+      const res = await fetch(url, options);
+      const data = await res.json();
+
+      if (data.roomId === roomId) setIsRoomOwner(true);
     }
-  }, []);
+
+    getRoom();
+  }, [roomId, currentUser]);
 
   // load room board saved status
   useEffect(() => {
@@ -65,12 +96,10 @@ function App() {
 
       const params = new URLSearchParams({
         roomId,
-        // ownerId: currentUser.userId,
-        // ownerId is hard coded
-        ownerId: "lyleyyy",
+        // ownerId: currentUser.id,
       });
 
-      const url = `${import.meta.env.VITE_SOCKET_SERVER_ADDRESS}/roomdata?${params.toString()}`;
+      const url = `${baseUrl}/roomdata?${params.toString()}`;
       const options = {
         method: "GET",
         headers: {
@@ -116,7 +145,7 @@ function App() {
                   shape: "line",
                   command: redoCommand,
                   roomId,
-                  userId: currentUser.userId,
+                  userId: currentUser.id,
                 });
               }
             }
@@ -136,7 +165,7 @@ function App() {
                   shape: "line",
                   command: undoCommand,
                   roomId,
-                  userId: currentUser.userId,
+                  userId: currentUser.id,
                 });
               }
             }
@@ -170,7 +199,7 @@ function App() {
       // testing
       // console.log(data.userId, "data.userId");
       // this is where the bug happened, the local undo delete the line, but in the event loop it not yet re-render, and then this emit command undo happen, the lines state is the same as the one just deleted line, so the state is not change, so the line has been deleted from the lines, but the re-render is not triggered? But why only happend when another user draw something
-      if (data.userId === currentUser.userId) return;
+      if (data.userId === currentUser.id) return;
 
       if (data.type === "draw") {
         if (data.shape === "line") {
@@ -199,7 +228,7 @@ function App() {
 
     socket.on("cursormove", (data) => {
       const { newCoord, userId, userName } = data;
-      if (!currentUser || userId === currentUser.userId) return;
+      if (!currentUser || userId === currentUser.id) return;
 
       setOtherUserCursors((prev) => [
         ...prev.filter((otherUserCursor) => otherUserCursor.userId !== userId),
@@ -244,8 +273,8 @@ function App() {
     socket.emit("cursormove", {
       newCoord,
       roomId,
-      userId: currentUser.userId,
-      userName: currentUser.username,
+      userId: currentUser.id,
+      userName: currentUser.user_name,
     });
 
     if (isDrawing) {
@@ -267,7 +296,7 @@ function App() {
           shape: "line",
           line: newLine,
           roomId,
-          userId: currentUser.userId,
+          userId: currentUser.id,
         });
       }
       // throttledEmit(newLine);
@@ -329,14 +358,11 @@ function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ownerId: currentUser.userId,
+          ownerId: currentUser.id,
         }),
       };
 
-      const res = await fetch(
-        `${import.meta.env.VITE_SOCKET_SERVER_ADDRESS}/room`,
-        options
-      );
+      const res = await fetch(`${baseUrl}/room`, options);
       const data = await res.json();
 
       const params = new URLSearchParams();
@@ -349,24 +375,20 @@ function App() {
   }
 
   async function handleSaveBoard() {
-    // if (!currentUser || currentUser.role !== "owner" || !roomId) return;
-    if (!currentUser || currentUser.role !== "owner") return;
+    if (!currentUser || !isRoomOwner) return;
 
     const options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         roomId,
-        ownerId: currentUser.userId,
+        ownerId: currentUser.id,
         boardLines: lines,
         boardEllipses: ellipses,
       }),
     };
 
-    const res = await fetch(
-      `${import.meta.env.VITE_SOCKET_SERVER_ADDRESS}/roomsave`,
-      options
-    );
+    const res = await fetch(`${baseUrl}/roomsave`, options);
 
     const data = await res.json();
     if (data) {
@@ -379,11 +401,13 @@ function App() {
       <Toaster />
       <ShapeSelectorBar />
       <Palette />
+      {!currentUser && <FakeLoginModal setCurrentUser={setCurrentUser} />}
+
       {currentUser &&
         otherUserCursors.length !== 0 &&
         otherUserCursors.map((userCursor) => {
           const { coord, userName } = userCursor;
-          if (currentUser.userId !== userCursor.userId) {
+          if (currentUser.id !== userCursor.userId) {
             const { x, y } = coord;
 
             return (
@@ -406,7 +430,7 @@ function App() {
         />
       )}
 
-      {currentUser && currentUser.role === "owner" && roomId && (
+      {currentUser && roomId && isRoomOwner && (
         <ThemeButton
           positionCss="absolute right-40 top-5"
           buttonName="Save"
@@ -414,15 +438,15 @@ function App() {
         />
       )}
 
-      {!roomId && currentUser && currentUser.role === "owner" && (
+      {!roomId && currentUser && (
         <ThemeButton
           positionCss="absolute right-5 top-5"
-          buttonName="New Room"
+          buttonName="Share"
           onClick={(e) => handleNewRoom(e)}
         />
       )}
 
-      {roomId && (
+      {roomId && currentUser && (
         <NavLink to="/">
           <SecondaryButton
             positionCss="absolute right-5 top-5"
@@ -452,6 +476,7 @@ function App() {
                 draggable={selectedShape === "cursor"}
               />
             ))}
+
           {lines &&
             lines.map((line) => (
               <Line
@@ -462,6 +487,7 @@ function App() {
                 draggable={selectedShape === "cursor"}
               />
             ))}
+
           {isEllisping && ellipse && (
             <Ellipse
               x={ellipse.x}
@@ -472,6 +498,7 @@ function App() {
               strokeWidth={ellipse.strokeWidth}
             />
           )}
+
           {isDrawing && (
             <Line
               points={line?.points}

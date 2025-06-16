@@ -3,7 +3,8 @@ import dotenv from 'dotenv'
 import { createServer } from 'http'
 import cors from 'cors'
 import { Server } from 'socket.io'
-import { create, loadBoard, updateBoard } from './data/room.repository'
+import { create, get, loadBoard, updateBoard } from './data/room.repository'
+import { signup } from './data/user.repository'
 dotenv.config()
 
 const app: Express = express()
@@ -19,6 +20,18 @@ const io = new Server(server, {
 app.use(cors())
 app.use(express.json())
 
+app.post('/user', async (req: Request, res: Response) => {
+  const { username } = req.body
+
+  try {
+    const data = await signup(username)
+
+    res.status(201).json({ data })
+  } catch (err) {
+    res.status(500).json({ message: 'Internal Error' })
+  }
+})
+
 app.post('/room', async (req: Request, res: Response) => {
   const { ownerId } = req.body
 
@@ -32,13 +45,27 @@ app.post('/room', async (req: Request, res: Response) => {
   }
 })
 
-app.get('/roomdata', async (req: Request, res: Response) => {
-  const { roomId, ownerId } = req.query
-
-  if (typeof roomId !== 'string' || typeof ownerId !== 'string') return
+app.get('/room', async (req: Request, res: Response) => {
+  const userId = req.query.userId as string
 
   try {
-    const data = await loadBoard(roomId, ownerId)
+    const data = await get(userId)
+    const room = data[0]
+
+    res.status(201).json({ roomId: room.id })
+  } catch (err) {
+    res.status(500).json({ message: 'Internal Error' })
+  }
+})
+
+app.get('/roomdata', async (req: Request, res: Response) => {
+  // const { roomId, ownerId } = req.query
+  const { roomId } = req.query
+
+  if (typeof roomId !== 'string') return
+
+  try {
+    const data = await loadBoard(roomId)
     if (data) res.status(200).json(data[0])
   } catch (err) {
     res.status(500).json({ message: 'Internal Error' })

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import ThemeButton from "./ThemeButton";
 import CopiedButton from "./CopiedButton";
 import { IoMdClose } from "react-icons/io";
+import ModalContainer from "./ModalContainer";
 
 interface NewRoomModalProps {
   roomId: string;
@@ -28,8 +29,8 @@ export default function NewRoomModal({ roomId, onClick }: NewRoomModalProps) {
   }
 
   return (
-    <div className="absolute z-20 h-full w-full bg-gray-600/10">
-      <div className="absolute top-1/2 left-1/2 flex h-1/3 w-1/3 -translate-1/2 flex-col items-center justify-center gap-8 rounded-sm bg-white shadow-2xl">
+    <ModalContainer>
+      <>
         <span
           className="hover:text- absolute top-3 right-3 cursor-pointer rounded-full transition duration-100 ease-in-out hover:bg-black hover:text-white"
           onClick={onClick}
@@ -47,7 +48,7 @@ export default function NewRoomModal({ roomId, onClick }: NewRoomModalProps) {
         )}
 
         {isCopied && <CopiedButton />}
-      </div>
-    </div>
+      </>
+    </ModalContainer>
   );
 }
