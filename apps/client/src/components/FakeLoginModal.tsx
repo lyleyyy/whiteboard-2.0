@@ -45,6 +45,7 @@ function FakeLoginModal({ setCurrentUser }: FakeLoginModalProps) {
           "
           type="text"
           placeholder="Input your nick name..."
+          maxLength={6}
           required
         />
 

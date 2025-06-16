@@ -23,6 +23,7 @@ import { useSelectedColor } from "./contexts/SelectedColorContext.tsx";
 import ellipseParametersCalculator from "./utils/ellipseParametersCalculator.ts";
 import { DrawEllipseCommand } from "./commands/DrawEllipseCommand.ts";
 import FakeLoginModal from "./components/FakeLoginModal.tsx";
+import UserDisplayer from "./components/UserDisplayer.tsx";
 
 const baseUrl =
   import.meta.env.PRODUCTION === "1"
@@ -69,6 +70,7 @@ function App() {
     async function getRoom() {
       if (!roomId || !currentUser) return;
 
+      console.log(currentUser);
       const params = new URLSearchParams({
         userId: currentUser.id,
       });
@@ -209,6 +211,15 @@ function App() {
             line,
           ]);
         }
+
+        if (data.shape === "ellipse") {
+          console.log(data, "hmm?????");
+          const { ellipse } = data;
+          setEllipses((prev) => [
+            ...prev.filter((drawedEllipse) => drawedEllipse.id !== ellipse.id),
+            ellipse,
+          ]);
+        }
       }
 
       if (data.type === "undo") {
@@ -312,12 +323,25 @@ function App() {
       const { startCoords, endCoords } = ellipseRaw;
 
       const data = ellipseParametersCalculator(startCoords, endCoords);
-      setEllipse({
+
+      const newEllipse = {
         ...data,
-        id: uuidv4(),
+        id: ellipse?.id || uuidv4(),
         stroke: selectedColor,
         strokeWidth: 2,
-      });
+      };
+
+      setEllipse(newEllipse);
+
+      if (roomId) {
+        socket.emit("command", {
+          type: "draw",
+          shape: "ellipse",
+          ellipse: newEllipse,
+          roomId,
+          userId: currentUser.id,
+        });
+      }
     }
   }
 
@@ -396,11 +420,17 @@ function App() {
     }
   }
 
+  function handleLeaveRoom() {
+    setLines([]);
+    setEllipses([]);
+  }
+
   return (
     <>
       <Toaster />
       <ShapeSelectorBar />
       <Palette />
+      {currentUser && <UserDisplayer username={currentUser.user_name} />}
       {!currentUser && <FakeLoginModal setCurrentUser={setCurrentUser} />}
 
       {currentUser &&
@@ -451,6 +481,7 @@ function App() {
           <SecondaryButton
             positionCss="absolute right-5 top-5"
             buttonName="Leave Room"
+            onClick={handleLeaveRoom}
           />
         </NavLink>
       )}

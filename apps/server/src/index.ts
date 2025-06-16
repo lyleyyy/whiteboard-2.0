@@ -94,7 +94,6 @@ io.on('connection', (socket) => {
   socket.on('command', (data) => {
     const roomId = data.roomId
 
-    // console.log(data, 'waya')
     // socket.broadcast.emit("command", command);
     io.to(roomId).emit('command', data)
   })
