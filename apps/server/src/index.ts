@@ -3,13 +3,8 @@ import dotenv from 'dotenv'
 import { createServer } from 'http'
 import cors from 'cors'
 import { Server } from 'socket.io'
-import { createUser } from './controllers/user.controller'
-import {
-  createRoom,
-  getRoomByUserId,
-  loadRoomData,
-  saveRoomData,
-} from './controllers/room.controller'
+import { router as userRouter } from './routes/user.router'
+import { router as roomRouter } from './routes/room.router'
 dotenv.config()
 
 const app: Express = express()
@@ -25,12 +20,8 @@ const io = new Server(server, {
 app.use(cors())
 app.use(express.json())
 
-app.post('/user', createUser)
-
-app.get('/room', getRoomByUserId)
-app.post('/room', createRoom)
-app.get('/roomdata', loadRoomData)
-app.post('/roomdata', saveRoomData)
+app.use('/', userRouter)
+app.use('/', roomRouter)
 
 io.on('connection', (socket) => {
   console.log(`🟢 User connected: ${socket.id}`)

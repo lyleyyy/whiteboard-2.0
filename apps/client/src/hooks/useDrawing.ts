@@ -49,10 +49,11 @@ function useDrawing(
       if (!roomId || !currentUser) return;
 
       const params = new URLSearchParams({
-        roomId,
+        // roomId,
+        userId: currentUser.id,
       });
 
-      const url = `${baseUrl}/roomdata?${params.toString()}`;
+      const url = `${baseUrl}/room?${params.toString()}`;
       const options = {
         method: "GET",
         headers: {
@@ -63,8 +64,8 @@ function useDrawing(
       const res = await fetch(url, options);
       const data = await res.json();
 
-      if (data) setLines(data.stage_lines);
-      if (data) setEllipses(data.stage_ellipses);
+      if (data) setLines(data.room.stage_lines);
+      if (data) setEllipses(data.room.stage_ellipses);
     }
 
     if (roomId) getRoomData();
@@ -345,7 +346,7 @@ function useDrawing(
     if (!currentUser || !isRoomOwner) return;
 
     const options = {
-      method: "POST",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         roomId,
@@ -355,7 +356,7 @@ function useDrawing(
       }),
     };
 
-    const res = await fetch(`${baseUrl}/roomdata`, options);
+    const res = await fetch(`${baseUrl}/room`, options);
 
     const data = await res.json();
     if (data) {

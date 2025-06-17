@@ -36,7 +36,7 @@ function useRoom(currentUser: User | null) {
       const res = await fetch(url, options);
       const data = await res.json();
 
-      if (data.roomId === roomId) setIsRoomOwner(true);
+      if (data.room.id === roomId) setIsRoomOwner(true);
     }
 
     getRoom();
