@@ -10,7 +10,7 @@ function ColorSelector({ twcss, isActive, onSelect }: ColorSelectorProps) {
   return (
     <div
       className={`hover:cursor-pointer p-1 rounded-sm ${bgCss}`}
-      onClick={() => onSelect()}
+      onClick={onSelect}
     >
       <div className={`w-[20px] h-[20px] rounded-sm ${twcss}`}></div>
     </div>

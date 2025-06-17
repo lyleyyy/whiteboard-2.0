@@ -1,6 +1,6 @@
 import { IoColorPaletteOutline } from "react-icons/io5";
 import ColorSelector from "./ColorSelector";
-import { useSelectedColor } from "../contexts/SelectedColorContext";
+import { useDrawingSelector } from "../contexts/DrawingSelectorContext";
 
 const colors = [
   { id: "black", twcss: "bg-black" },
@@ -13,7 +13,7 @@ const colors = [
 ];
 
 function Palette() {
-  const { selectedColor, setSelectedColor } = useSelectedColor();
+  const { selectedColor, setSelectedColor } = useDrawingSelector();
 
   return (
     <div className="w-[40px] h-[250px] flex flex-col justify-between items-center absolute left-3 top-1/2 -translate-y-1/2  shadow-sm border border-gray-200 rounded-md z-10 bg-white p-1">

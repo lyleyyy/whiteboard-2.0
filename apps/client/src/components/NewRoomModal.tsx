@@ -13,10 +13,10 @@ export default function NewRoomModal({ roomId, onClick }: NewRoomModalProps) {
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
   useEffect(() => {
-    const intervalID = setInterval(() => setIsCopied(false), 3000);
+    const timeoutID = setTimeout(() => setIsCopied(false), 3000);
 
     return () => {
-      clearInterval(intervalID);
+      clearTimeout(timeoutID);
     };
   }, [isCopied]);
 
