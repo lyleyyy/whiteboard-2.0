@@ -1,14 +1,15 @@
-import ModalContainer from "./ModalContainer";
+import ModalContainer from "../UI/ModalContainer";
 import type { FormEvent } from "react";
-import type { User } from "../types/User";
+import { useCurrentUser } from "../contexts/CurrentUserContext";
 
-const url = `${import.meta.env.PRODUCTION === "1" ? import.meta.env.VITE_SOCKET_SERVER_ADDRESS_PRODUCTION : import.meta.env.VITE_SOCKET_SERVER_ADDRESS_DEV}/user`;
+const baseUrl =
+  import.meta.env.PRODUCTION === "1"
+    ? import.meta.env.VITE_SOCKET_SERVER_ADDRESS_PRODUCTION
+    : import.meta.env.VITE_SOCKET_SERVER_ADDRESS_DEV;
 
-interface FakeLoginModalProps {
-  setCurrentUser: React.Dispatch<React.SetStateAction<User | undefined>>;
-}
+function LoginModal() {
+  const { setCurrentUser } = useCurrentUser();
 
-function FakeLoginModal({ setCurrentUser }: FakeLoginModalProps) {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -21,7 +22,7 @@ function FakeLoginModal({ setCurrentUser }: FakeLoginModalProps) {
       body: JSON.stringify({ username }),
     };
 
-    const res = await fetch(url, options);
+    const res = await fetch(`${baseUrl}/user`, options);
     const data = await res.json();
 
     const user = data.data;
@@ -61,4 +62,4 @@ function FakeLoginModal({ setCurrentUser }: FakeLoginModalProps) {
   );
 }
 
-export default FakeLoginModal;
+export default LoginModal;

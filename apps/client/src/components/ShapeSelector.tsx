@@ -1,4 +1,4 @@
-import { useSelectedShape } from "../contexts/SelectedShapeContext";
+import { useDrawingSelector } from "../contexts/DrawingSelectorContext";
 
 interface ShapeSelectorProps {
   shapeId: string;
@@ -14,7 +14,7 @@ function ShapeSelector({
   children,
 }: ShapeSelectorProps) {
   const activeClass = isActive ? "bg-purple-300" : "hover:bg-purple-100";
-  const { setSelectedShape } = useSelectedShape();
+  const { setSelectedShape } = useDrawingSelector();
 
   return (
     <div

@@ -4,7 +4,7 @@ interface UserDisplayerProps {
 
 function UserDisplayer({ username }: UserDisplayerProps) {
   return (
-    <div className="absolute right-10 bottom-10">
+    <div className="absolute right-5 bottom-5">
       <div
         className="
         w-16 h-16
@@ -32,19 +32,6 @@ function UserDisplayer({ username }: UserDisplayerProps) {
           text-center
           overflow-hidden
           text-ellipsis
-        "
-        >
-          {username}
-        </span>
-
-        <span
-          className="
-          absolute
-          opacity-0
-          transform transition-all duration-300 ease-out
-          group-hover:scale-100
-          group-hover:opacity-100
-          text-center
         "
         >
           {username}

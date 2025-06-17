@@ -3,8 +3,8 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
-import { SelectedShapeProvider } from "./contexts/SelectedShapeContext.tsx";
-import { SelectedColorProvider } from "./contexts/SelectedColorContext.tsx";
+import { CurrentUserProvider } from "./contexts/CurrentUserContext.tsx";
+import { DrawingSelectorProvider } from "./contexts/DrawingSelectorContext.tsx";
 
 const router = createBrowserRouter([
   {
@@ -19,11 +19,11 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <SelectedColorProvider>
-      <SelectedShapeProvider>
+    <CurrentUserProvider>
+      <DrawingSelectorProvider>
         <RouterProvider router={router} />
-      </SelectedShapeProvider>
-    </SelectedColorProvider>
+      </DrawingSelectorProvider>
+    </CurrentUserProvider>
     {/* <App /> */}
   </StrictMode>
 );

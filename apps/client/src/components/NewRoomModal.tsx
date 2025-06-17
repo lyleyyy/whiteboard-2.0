@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ThemeButton from "./ThemeButton";
 import CopiedButton from "./CopiedButton";
 import { IoMdClose } from "react-icons/io";
-import ModalContainer from "./ModalContainer";
+import ModalContainer from "../UI/ModalContainer";
 
 interface NewRoomModalProps {
   roomId: string;

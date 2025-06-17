@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Stage, Layer, Line, Ellipse } from "react-konva";
+import { Stage, Layer, Line, Ellipse, Rect } from "react-konva";
 import { NavLink, useSearchParams } from "react-router";
 import { v4 as uuidv4 } from "uuid";
 import toast, { Toaster } from "react-hot-toast";
@@ -15,15 +15,17 @@ import type { DrawCommand } from "./commands/types";
 import type { LineInterface } from "./types/LineInterface.ts";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { UserCursor } from "./types/UserCursor.ts";
-import type { User } from "./types/User.ts";
 import type { EllipseRawInterface } from "./types/EllipseRawInterface.ts";
 import type { EllipseInterface } from "./types/EllipseInterface.ts";
-import { useSelectedShape } from "./contexts/SelectedShapeContext.tsx";
-import { useSelectedColor } from "./contexts/SelectedColorContext.tsx";
 import ellipseParametersCalculator from "./utils/ellipseParametersCalculator.ts";
 import { DrawEllipseCommand } from "./commands/DrawEllipseCommand.ts";
-import FakeLoginModal from "./components/FakeLoginModal.tsx";
 import UserDisplayer from "./components/UserDisplayer.tsx";
+import type { RectRawInterface } from "./types/RectRawInterface.ts";
+import rectParametersCalculator from "./utils/rectParametersCalculator.ts";
+import type { RectInterface } from "./types/RectInterface.ts";
+import { useCurrentUser } from "./contexts/CurrentUserContext.tsx";
+import LoginModal from "./components/LoginModal.tsx";
+import { useDrawingSelector } from "./contexts/DrawingSelectorContext.tsx";
 
 const baseUrl =
   import.meta.env.PRODUCTION === "1"
@@ -31,9 +33,14 @@ const baseUrl =
     : import.meta.env.VITE_SOCKET_SERVER_ADDRESS_DEV;
 
 function App() {
-  const [currentUser, setCurrentUser] = useState<User>();
+  const { currentUser } = useCurrentUser();
   const [isDrawing, setIsDrawing] = useState(false);
   const [isEllisping, setIsEllisping] = useState(false);
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [rectRaw, setRectRaw] = useState<RectRawInterface | null>(null);
+  const [selectingRect, setSelectingRect] = useState<RectInterface | null>(
+    null
+  );
   const [line, setLine] = useState<LineInterface | null>(null);
   const [lines, setLines] = useState<LineInterface[]>([]);
   const [ellipseRaw, setEllipseRaw] = useState<EllipseRawInterface | null>(
@@ -47,23 +54,10 @@ function App() {
   const [isNewRoomModalOpen, setIsNewRoomModalOpen] = useState<boolean>(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [isRoomOwner, setIsRoomOwner] = useState(false);
-  const { selectedShape } = useSelectedShape();
-  const { selectedColor, setSelectedColor } = useSelectedColor();
+  const [selectedShapeIds, setSelectedShapeIds] = useState<string[]>([]);
+  const { selectedShape, selectedColor, setSelectedColor } =
+    useDrawingSelector();
   const roomId = searchParams.get("room");
-
-  // initialize the user
-  // useEffect(() => {
-  //   const owner = localStorage.getItem("whiteboard_owner");
-
-  //   if (!owner) {
-  //     const guest = generateGuest();
-  //     localStorage.setItem("whiteboard_guest", JSON.stringify(guest));
-
-  //     setCurrentUser(guest);
-  //   } else {
-  //     setCurrentUser(JSON.parse(owner));
-  //   }
-  // }, []);
 
   // if current user is owner
   useEffect(() => {
@@ -266,6 +260,7 @@ function App() {
 
   function handleMouseDown(e: KonvaEventObject<PointerEvent>) {
     if (e.evt.button === 0) {
+      const newCoord = e.target.getStage()!.getPointerPosition()!;
       if (selectedShape === "pencil") setIsDrawing(true);
       if (selectedShape === "eraser") {
         setIsDrawing(true);
@@ -274,7 +269,6 @@ function App() {
       if (selectedShape === "circle") {
         setIsEllisping(true);
 
-        const newCoord = e.target.getStage()!.getPointerPosition()!;
         const newEllispe = {
           startCoords: newCoord,
           endCoords: null,
@@ -282,22 +276,29 @@ function App() {
 
         setEllipseRaw(newEllispe);
       }
+
+      if (selectedShape === "cursor") {
+        setIsSelecting(true);
+        setRectRaw(newCoord);
+      }
     }
   }
 
   function handleMouseMove(e: KonvaEventObject<PointerEvent>) {
-    if (!currentUser || !roomId) return;
+    if (!currentUser) return;
 
     const newCoord = e.target.getStage()?.getPointerPosition();
     if (!newCoord) return;
 
     // mouse move cursor
-    socket.emit("cursormove", {
-      newCoord,
-      roomId,
-      userId: currentUser.id,
-      userName: currentUser.user_name,
-    });
+    if (roomId) {
+      socket.emit("cursormove", {
+        newCoord,
+        roomId,
+        userId: currentUser.id,
+        userName: currentUser.user_name,
+      });
+    }
 
     if (isDrawing) {
       const newLine = {
@@ -354,6 +355,21 @@ function App() {
         });
       }
     }
+
+    if (isSelecting) {
+      if (!rectRaw) return;
+      const { width, height } = rectParametersCalculator(rectRaw, newCoord);
+
+      const newRect = {
+        id: uuidv4(),
+        x: rectRaw.x,
+        y: rectRaw.y,
+        width,
+        height,
+      };
+
+      setSelectingRect(newRect);
+    }
   }
 
   function handleMouseUp() {
@@ -382,6 +398,11 @@ function App() {
 
       setEllipseRaw(null);
       setEllipse(null);
+    }
+
+    if (selectedShape === "cursor") {
+      setRectRaw(null);
+      setSelectingRect(null);
     }
   }
 
@@ -436,13 +457,18 @@ function App() {
     setEllipses([]);
   }
 
+  function handleSelectShape(shapeId: string) {
+    console.log(shapeId);
+    setSelectedShapeIds([shapeId]);
+  }
+
   return (
     <>
       <Toaster />
       <ShapeSelectorBar />
       <Palette />
       {currentUser && <UserDisplayer username={currentUser.user_name} />}
-      {!currentUser && <FakeLoginModal setCurrentUser={setCurrentUser} />}
+      {!currentUser && <LoginModal />}
 
       {roomId &&
         currentUser &&
@@ -516,7 +542,6 @@ function App() {
                 radiusY={ellipse.radiusY}
                 stroke={ellipse.stroke}
                 strokeWidth={ellipse.strokeWidth}
-                draggable={selectedShape === "cursor"}
               />
             ))}
 
@@ -527,7 +552,7 @@ function App() {
                 points={line.points}
                 stroke={line.stroke}
                 strokeWidth={line.strokeWidth}
-                draggable={selectedShape === "cursor"}
+                onClick={() => handleSelectShape(line.id)}
               />
             ))}
 
@@ -539,6 +564,7 @@ function App() {
               radiusY={ellipse.radiusY}
               stroke={ellipse.stroke}
               strokeWidth={ellipse.strokeWidth}
+              onClick={() => handleSelectShape(ellipse.id)}
             />
           )}
 
@@ -547,6 +573,18 @@ function App() {
               points={line?.points}
               stroke={selectedColor}
               strokeWidth={selectedColor === "white" ? 40 : 4}
+            />
+          )}
+
+          {isSelecting && selectingRect && (
+            <Rect
+              x={selectingRect.x}
+              y={selectingRect.y}
+              width={selectingRect.width}
+              height={selectingRect.height}
+              fill="rgba(108, 92, 231, 0.1)"
+              stroke="#6c5ce7"
+              strokeWidth={1}
             />
           )}
         </Layer>
