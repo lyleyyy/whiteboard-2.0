@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import type { User } from "../types/User";
 import { useSearchParams } from "react-router";
 import { socket } from "../lib/socketClient";
+import baseUrl from "../utils/baseUrl";
 
-function useRoom(currentUser: User | null, baseUrl: string) {
+function useRoom(currentUser: User | null) {
   const [isNewRoomModalOpen, setIsNewRoomModalOpen] = useState<boolean>(false);
   const [isRoomOwner, setIsRoomOwner] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();

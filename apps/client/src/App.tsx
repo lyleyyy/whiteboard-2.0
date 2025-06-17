@@ -13,11 +13,6 @@ import useRoom from "./hooks/useRoom.ts";
 import WhiteBoardStage from "./components/WhiteBoardStage.tsx";
 import OtherUserCursorsDisplayer from "./components/OtherUserCursorsDisplayer.tsx";
 
-const baseUrl =
-  import.meta.env.PRODUCTION === "1"
-    ? import.meta.env.VITE_SOCKET_SERVER_ADDRESS_PRODUCTION
-    : import.meta.env.VITE_SOCKET_SERVER_ADDRESS_DEV;
-
 function App() {
   const { currentUser } = useCurrentUser();
   // const [selectedShapeIds, setSelectedShapeIds] = useState<string[]>([]);
@@ -27,7 +22,7 @@ function App() {
     setIsNewRoomModalOpen,
     isRoomOwner,
     handleNewRoom,
-  } = useRoom(currentUser, baseUrl);
+  } = useRoom(currentUser);
 
   const {
     isDrawing,
@@ -44,7 +39,7 @@ function App() {
     handleMouseUp,
     handleSaveBoard,
     handleClearBoard,
-  } = useDrawing(roomId, currentUser, baseUrl, isRoomOwner);
+  } = useDrawing(roomId, currentUser, isRoomOwner);
 
   function handleSelectShape(shapeId: string) {
     console.log(shapeId);

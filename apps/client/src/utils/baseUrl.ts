@@ -1,0 +1,6 @@
+const baseUrl =
+  import.meta.env.PRODUCTION === "1"
+    ? import.meta.env.VITE_SOCKET_SERVER_ADDRESS_PRODUCTION
+    : import.meta.env.VITE_SOCKET_SERVER_ADDRESS_DEV;
+
+export default baseUrl;

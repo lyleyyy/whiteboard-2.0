@@ -16,11 +16,11 @@ import { DrawEllipseCommand } from "../commands/DrawEllipseCommand";
 import type { User } from "../types/User";
 import type { UserCursor } from "../types/UserCursor";
 import toast from "react-hot-toast";
+import baseUrl from "../utils/baseUrl";
 
 function useDrawing(
   roomId: string | null,
   currentUser: User | null,
-  baseUrl: string,
   isRoomOwner: boolean
 ) {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -355,7 +355,7 @@ function useDrawing(
       }),
     };
 
-    const res = await fetch(`${baseUrl}/roomsave`, options);
+    const res = await fetch(`${baseUrl}/roomdata`, options);
 
     const data = await res.json();
     if (data) {
