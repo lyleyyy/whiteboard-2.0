@@ -1,6 +1,5 @@
 import { NavLink } from "react-router";
 import { Toaster } from "react-hot-toast";
-import { PiCursorClickDuotone } from "react-icons/pi";
 import ThemeButton from "./components/ThemeButton.tsx";
 import NewRoomModal from "./components/NewRoomModal.tsx";
 import SecondaryButton from "./components/SecondaryButton.tsx";
@@ -12,6 +11,7 @@ import LoginModal from "./components/LoginModal.tsx";
 import useDrawing from "./hooks/useDrawing.ts";
 import useRoom from "./hooks/useRoom.ts";
 import WhiteBoardStage from "./components/WhiteBoardStage.tsx";
+import OtherUserCursorsDisplayer from "./components/OtherUserCursorsDisplayer.tsx";
 
 const baseUrl =
   import.meta.env.PRODUCTION === "1"
@@ -33,11 +33,9 @@ function App() {
     isDrawing,
     line,
     lines,
-    setLines,
     isEllisping,
     ellipse,
     ellipses,
-    setEllipses,
     isSelecting,
     selectingRect,
     otherUserCursors,
@@ -45,12 +43,8 @@ function App() {
     handleMouseMove,
     handleMouseUp,
     handleSaveBoard,
+    handleClearBoard,
   } = useDrawing(roomId, currentUser, baseUrl, isRoomOwner);
-
-  function handleLeaveRoom() {
-    setLines([]);
-    setEllipses([]);
-  }
 
   function handleSelectShape(shapeId: string) {
     console.log(shapeId);
@@ -62,29 +56,7 @@ function App() {
       <Toaster />
       <ShapeSelectorBar />
       <Palette />
-      {currentUser && <UserDisplayer username={currentUser.user_name} />}
       {!currentUser && <LoginModal />}
-
-      {roomId &&
-        currentUser &&
-        otherUserCursors.length > 0 &&
-        otherUserCursors.map((userCursor) => {
-          const { coord, userName } = userCursor;
-          if (currentUser.id !== userCursor.userId) {
-            const { x, y } = coord;
-
-            return (
-              <span
-                key={userCursor.userId}
-                className={`absolute flex`}
-                style={{ left: `${x}px`, top: `${y}px` }}
-              >
-                <PiCursorClickDuotone />
-                <p className="text-sm">{userName}</p>
-              </span>
-            );
-          }
-        })}
 
       {isNewRoomModalOpen && roomId && (
         <NewRoomModal
@@ -114,7 +86,7 @@ function App() {
           <SecondaryButton
             positionCss="absolute right-5 top-5"
             buttonName="Leave Room"
-            onClick={handleLeaveRoom}
+            onClick={handleClearBoard}
           />
         </NavLink>
       )}
@@ -133,6 +105,15 @@ function App() {
         handleMouseUp={handleMouseUp}
         handleSelectShape={handleSelectShape}
       />
+
+      {roomId && currentUser && otherUserCursors.length > 0 && (
+        <OtherUserCursorsDisplayer
+          currentUser={currentUser}
+          otherUserCursors={otherUserCursors}
+        />
+      )}
+
+      {currentUser && <UserDisplayer username={currentUser.user_name} />}
     </>
   );
 }

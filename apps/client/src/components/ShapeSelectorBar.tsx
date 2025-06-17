@@ -41,7 +41,7 @@ function ShapeSelectorBar() {
   }
 
   return (
-    <div className="flex justify-between items-center w-1/5 h-[40px] absolute right-1/2 top-5 translate-x-1/2 shadow-sm border border-gray-200 rounded-md z-10 bg-white p-1">
+    <div className="flex justify-between items-center w-[300px] h-[40px] absolute right-1/2 top-5 translate-x-1/2 shadow-sm border border-gray-200 rounded-md z-10 bg-white p-1">
       {shapes.map((shape) => (
         <ShapeSelector
           key={shape.id}

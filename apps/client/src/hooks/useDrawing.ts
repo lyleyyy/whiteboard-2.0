@@ -363,6 +363,11 @@ function useDrawing(
     }
   }
 
+  function handleClearBoard() {
+    setLines([]);
+    setEllipses([]);
+  }
+
   return {
     isDrawing,
     line,
@@ -379,6 +384,7 @@ function useDrawing(
     handleMouseMove,
     handleMouseUp,
     handleSaveBoard,
+    handleClearBoard,
   };
 }
 
