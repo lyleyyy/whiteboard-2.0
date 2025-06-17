@@ -23,7 +23,7 @@ function useRoom(currentUser: User | null) {
       if (!roomId || !currentUser) return;
 
       const params = new URLSearchParams({
-        userId: currentUser.id,
+        roomId,
       });
 
       const url = `${baseUrl}/room?${params.toString()}`;
@@ -36,7 +36,7 @@ function useRoom(currentUser: User | null) {
       const res = await fetch(url, options);
       const data = await res.json();
 
-      if (data.room.id === roomId) setIsRoomOwner(true);
+      if (data.room.owner_id === currentUser.id) setIsRoomOwner(true);
     }
 
     getRoom();

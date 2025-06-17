@@ -1,9 +1,7 @@
 import supabase from '../services/supabase'
 
 export async function create(ownerId: string) {
-  const existingRoom = await get(ownerId)
-
-  console.log(existingRoom, 'hmm?')
+  const existingRoom = await getRoomByOwnerId(ownerId)
 
   if (existingRoom.length > 0) {
     return existingRoom
@@ -19,11 +17,22 @@ export async function create(ownerId: string) {
   return data
 }
 
-export async function get(ownerId: string) {
+async function getRoomByOwnerId(ownerId: string) {
   const { data, error } = await supabase
     .from('rooms')
     .select('*')
     .eq('owner_id', ownerId)
+
+  if (error) throw new Error('Supabase db error: ' + error.message)
+
+  return data
+}
+
+export async function get(roomId: string) {
+  const { data, error } = await supabase
+    .from('rooms')
+    .select('*')
+    .eq('id', roomId)
 
   if (error) throw new Error('Supabase db error: ' + error.message)
 

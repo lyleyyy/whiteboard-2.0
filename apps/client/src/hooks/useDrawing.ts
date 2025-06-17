@@ -49,8 +49,8 @@ function useDrawing(
       if (!roomId || !currentUser) return;
 
       const params = new URLSearchParams({
-        // roomId,
-        userId: currentUser.id,
+        roomId,
+        // userId: currentUser.id,
       });
 
       const url = `${baseUrl}/room?${params.toString()}`;

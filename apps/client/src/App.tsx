@@ -108,7 +108,7 @@ function App() {
         />
       )}
 
-      {currentUser && <UserDisplayer username={currentUser.user_name} />}
+      {currentUser && <UserDisplayer />}
     </>
   );
 }

@@ -3,6 +3,7 @@ import type { LineInterface } from "../types/LineInterface";
 import type { EllipseInterface } from "../types/EllipseInterface";
 import type { RectInterface } from "../types/RectInterface";
 import type { KonvaEventObject } from "konva/lib/Node";
+import { useCurrentUser } from "../contexts/CurrentUserContext";
 
 interface WhiteBoardStageProps {
   isDrawing: boolean;
@@ -33,6 +34,8 @@ function WhiteBoardStage({
   handleMouseUp,
   handleSelectShape,
 }: WhiteBoardStageProps) {
+  const { currentUser } = useCurrentUser();
+
   return (
     <Stage
       width={window.innerWidth}
@@ -42,7 +45,8 @@ function WhiteBoardStage({
       onPointerMove={handleMouseMove}
     >
       <Layer>
-        {ellipses &&
+        {currentUser &&
+          ellipses &&
           ellipses.map((ellipse) => (
             <Ellipse
               key={ellipse.id}
@@ -55,7 +59,8 @@ function WhiteBoardStage({
             />
           ))}
 
-        {lines &&
+        {currentUser &&
+          lines &&
           lines.map((line) => (
             <Line
               key={line.id}
@@ -66,7 +71,7 @@ function WhiteBoardStage({
             />
           ))}
 
-        {isEllisping && ellipse && (
+        {currentUser && isEllisping && ellipse && (
           <Ellipse
             x={ellipse.x}
             y={ellipse.y}
@@ -78,7 +83,7 @@ function WhiteBoardStage({
           />
         )}
 
-        {isDrawing && line && (
+        {currentUser && isDrawing && line && (
           <Line
             points={line.points}
             stroke={line.stroke}
@@ -86,7 +91,7 @@ function WhiteBoardStage({
           />
         )}
 
-        {isSelecting && selectingRect && (
+        {currentUser && isSelecting && selectingRect && (
           <Rect
             x={selectingRect.x}
             y={selectingRect.y}

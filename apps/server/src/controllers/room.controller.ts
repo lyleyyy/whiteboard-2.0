@@ -14,11 +14,11 @@ export async function createRoom(req: Request, res: Response) {
   }
 }
 
-export async function getRoomByUserId(req: Request, res: Response) {
-  const userId = req.query.userId as string
+export async function getRoomById(req: Request, res: Response) {
+  const roomId = req.query.roomId as string
 
   try {
-    const data = await get(userId)
+    const data = await get(roomId)
     const room = data[0]
 
     res.status(201).json({ room })
