@@ -10,6 +10,7 @@ import { MdFormatColorText } from "react-icons/md";
 import { BiEraser } from "react-icons/bi";
 import ShapeSelector from "./ShapeSelector";
 import { useState } from "react";
+import { useDrawingSelector } from "../contexts/DrawingSelectorContext";
 
 interface ShapeConfig {
   id: string;
@@ -30,10 +31,13 @@ const shapes: ShapeConfig[] = [
 ];
 
 function ShapeSelectorBar() {
-  const [activeShapeId, setActiveShapeId] = useState<string>("pencil");
+  const [activeShapeId, setActiveShapeId] = useState<string>("cursor");
+  const { selectedColor, setSelectedColor } = useDrawingSelector();
 
   function handleShapeSelect(id: string) {
     setActiveShapeId(id);
+    if (id === "eraser") setSelectedColor("white");
+    if (id !== "eraser" && selectedColor === "white") setSelectedColor("black");
   }
 
   return (
