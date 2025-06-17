@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ThemeButton from "./ThemeButton";
-import CopiedButton from "./CopiedButton";
+import CopiedButton from "../UI/CopiedIcon";
 import { IoMdClose } from "react-icons/io";
 import ModalContainer from "../UI/ModalContainer";
 
