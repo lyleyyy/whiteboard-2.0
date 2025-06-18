@@ -12,6 +12,8 @@ import useDrawing from "./hooks/useDrawing.ts";
 import useRoom from "./hooks/useRoom.ts";
 import WhiteBoardStage from "./components/WhiteBoardStage.tsx";
 import OtherUserCursorsDisplayer from "./components/OtherUserCursorsDisplayer.tsx";
+import { useEffect } from "react";
+import useUndoRedo from "./hooks/useUndoRedo.ts";
 
 function App() {
   const { currentUser } = useCurrentUser();
@@ -41,6 +43,16 @@ function App() {
     handleSaveBoard,
     handleClearBoard,
   } = useDrawing(roomId, currentUser, isRoomOwner);
+
+  const { undoRedo } = useUndoRedo(roomId);
+
+  useEffect(() => {
+    window.addEventListener("keydown", undoRedo);
+
+    return () => {
+      window.removeEventListener("keydown", undoRedo);
+    };
+  }, [undoRedo]);
 
   function handleSelectShape(shapeId: string) {
     console.log(shapeId);

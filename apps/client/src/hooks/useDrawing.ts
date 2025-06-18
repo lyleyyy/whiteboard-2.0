@@ -1,15 +1,6 @@
 import { useState } from "react";
-import type { LineInterface } from "../types/LineInterface";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { useDrawingSelector } from "../contexts/DrawingSelectorContext";
-import type { EllipseRawInterface } from "../types/EllipseRawInterface";
-import type { EllipseInterface } from "../types/EllipseInterface";
-import type { RectRawInterface } from "../types/RectRawInterface";
-import type { RectInterface } from "../types/RectInterface";
-import { socket } from "../lib/socketClient";
-import { v4 as uuidv4 } from "uuid";
-import ellipseParametersCalculator from "../utils/ellipseParametersCalculator";
-import rectParametersCalculator from "../utils/rectParametersCalculator";
 import { DrawLineCommand } from "../commands/DrawLineCommand";
 import { DrawEllipseCommand } from "../commands/DrawEllipseCommand";
 import type { User } from "../types/User";
@@ -19,27 +10,47 @@ import baseUrl from "../utils/baseUrl";
 import useSocketListener from "./useSocketListener";
 import useUndoRedo from "./useUndoRedo";
 import useLoadRoomBoardData from "./useLoadRoomBoardData";
+import useDrawLine from "./useDrawLine";
+import useDrawEllipse from "./useDrawEllipse";
+import useSocketEmitter from "./useSocketEmitter";
+import useDrawRect from "./useDrawRect";
 
 function useDrawing(
   roomId: string | null,
   currentUser: User | null,
   isRoomOwner: boolean
 ) {
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [line, setLine] = useState<LineInterface | null>(null);
-  const [lines, setLines] = useState<LineInterface[]>([]);
-  const [isEllisping, setIsEllisping] = useState(false);
-  const [ellipseRaw, setEllipseRaw] = useState<EllipseRawInterface | null>(
-    null
-  );
-  const [ellipse, setEllipse] = useState<EllipseInterface | null>(null);
-  const [ellipses, setEllipses] = useState<EllipseInterface[]>([]);
-  const [rectRaw, setRectRaw] = useState<RectRawInterface | null>(null);
-  const [selectingRect, setSelectingRect] = useState<RectInterface | null>(
-    null
-  );
-  const [isSelecting, setIsSelecting] = useState(false);
-  const { selectedShape, selectedColor } = useDrawingSelector();
+  const {
+    isDrawing,
+    setIsDrawing,
+    line,
+    setLine,
+    lines,
+    setLines,
+    drawingNewLine,
+  } = useDrawLine(roomId);
+
+  const {
+    isEllisping,
+    setIsEllisping,
+    setEllipseRaw,
+    ellipse,
+    setEllipse,
+    ellipses,
+    setEllipses,
+    drawingNewEllipse,
+  } = useDrawEllipse(roomId);
+
+  const {
+    setRectRaw,
+    selectingRect,
+    setSelectingRect,
+    isSelecting,
+    setIsSelecting,
+    drawSelectingBox,
+  } = useDrawRect();
+
+  const { selectedShape } = useDrawingSelector();
 
   const [otherUserCursors, setOtherUserCursors] = useState<UserCursor[]>([]);
 
@@ -53,6 +64,7 @@ function useDrawing(
     setEllipses,
     setOtherUserCursors
   );
+  const { emitCursorMove } = useSocketEmitter();
 
   function handleMouseDown(e: KonvaEventObject<PointerEvent>) {
     if (e.evt.button === 0) {
@@ -81,93 +93,30 @@ function useDrawing(
 
   function handleMouseMove(e: KonvaEventObject<PointerEvent>) {
     if (!currentUser) return;
-
     const newCoord = e.target.getStage()?.getPointerPosition();
     if (!newCoord) return;
 
-    // mouse move cursor
     if (roomId) {
-      socket.emit("cursormove", {
-        newCoord,
-        roomId,
-        userId: currentUser.id,
-        userName: currentUser.user_name,
-      });
+      emitCursorMove(roomId, newCoord);
     }
 
     if (isDrawing) {
-      const newLine = {
-        id: line?.id || uuidv4(),
-        points: [...(line?.points ?? []), newCoord.x, newCoord.y],
-        stroke: selectedColor,
-        strokeWidth: selectedColor === "white" ? 40 : 4,
-      };
-
-      setLine(newLine);
-
-      if (roomId) {
-        socket.emit("command", {
-          type: "draw",
-          shape: "line",
-          line: newLine,
-          roomId,
-          userId: currentUser.id,
-        });
-      }
-      // throttledEmit(newLine);
+      drawingNewLine(newCoord);
     }
 
     if (isEllisping) {
-      setEllipseRaw((prev) => {
-        if (!prev) return null;
-        return { startCoords: prev.startCoords, endCoords: newCoord };
-      });
-
-      if (!ellipseRaw || !ellipseRaw.endCoords) return;
-      const { startCoords, endCoords } = ellipseRaw;
-
-      const data = ellipseParametersCalculator(startCoords, endCoords);
-
-      const newEllipse = {
-        ...data,
-        id: ellipse?.id || uuidv4(),
-        stroke: selectedColor,
-        strokeWidth: 2,
-      };
-
-      setEllipse(newEllipse);
-
-      if (roomId) {
-        socket.emit("command", {
-          type: "draw",
-          shape: "ellipse",
-          ellipse: newEllipse,
-          roomId,
-          userId: currentUser.id,
-        });
-      }
+      drawingNewEllipse(newCoord);
     }
 
     if (isSelecting) {
-      if (!rectRaw) return;
-      const { width, height } = rectParametersCalculator(rectRaw, newCoord);
-
-      const newRect = {
-        id: uuidv4(),
-        x: rectRaw.x,
-        y: rectRaw.y,
-        width,
-        height,
-      };
-
-      setSelectingRect(newRect);
+      drawSelectingBox(newCoord);
     }
   }
 
   function handleMouseUp() {
     if (selectedShape === "pencil" || selectedShape === "eraser") {
       setIsDrawing(false);
-      // setIsEarsing(false);
+
       if (line) {
         setLines((prev) => [...(prev ?? []), line]);
         const drawLineCommand = new DrawLineCommand(line, setLines);

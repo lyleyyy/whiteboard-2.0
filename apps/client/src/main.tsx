@@ -3,8 +3,9 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
-import { CurrentUserProvider } from "./contexts/CurrentUserContext.tsx";
 import { DrawingSelectorProvider } from "./contexts/DrawingSelectorContext.tsx";
+import { UndoRedoStackProvider } from "./contexts/UndoRedoStackContext.tsx";
+import { CurrentUserProvider } from "./contexts/CurrentUserContext.tsx";
 
 const router = createBrowserRouter([
   {
@@ -20,10 +21,11 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <CurrentUserProvider>
-      <DrawingSelectorProvider>
-        <RouterProvider router={router} />
-      </DrawingSelectorProvider>
+      <UndoRedoStackProvider>
+        <DrawingSelectorProvider>
+          <RouterProvider router={router} />
+        </DrawingSelectorProvider>
+      </UndoRedoStackProvider>
     </CurrentUserProvider>
-    {/* <App /> */}
   </StrictMode>
 );
