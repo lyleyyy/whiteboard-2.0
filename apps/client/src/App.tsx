@@ -41,7 +41,8 @@ function App() {
     setEllipses,
     openTextArea,
     textAreaCoord,
-    Texts,
+    texts,
+    setTexts,
     handleDblClick,
     handleTextSubmit,
     isSelecting,
@@ -134,6 +135,7 @@ function App() {
         isEllisping={isEllisping}
         ellipse={ellipse}
         ellipses={ellipses}
+        texts={texts}
         isSelecting={isSelecting}
         selectingRect={selectingRect}
         handleMouseDown={handleMouseDown}
@@ -142,7 +144,6 @@ function App() {
         // handleSelectShape={handleSelectShape}
         // handleCursorMove={handleCursorMove}
         handleDblClick={handleDblClick}
-        Texts={Texts}
       />
 
       {roomId && currentUser && otherUserCursors.length > 0 && (
@@ -153,7 +154,11 @@ function App() {
       )}
 
       {currentUser && (
-        <UserDisplayer setLines={setLines} setEllipses={setEllipses} />
+        <UserDisplayer
+          setLines={setLines}
+          setEllipses={setEllipses}
+          setTexts={setTexts}
+        />
       )}
 
       {openTextArea && textAreaCoord && (

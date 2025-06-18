@@ -24,8 +24,6 @@ function useSocketListener(
       // this is where the bug happened, the local undo delete the line, but in the event loop it not yet re-render, and then this emit command undo happen, the lines state is the same as the one just deleted line, so the state is not change, so the line has been deleted from the lines, but the re-render is not triggered? But why only happend when another user draw something
       if (data.userId === currentUser.id) return;
 
-      console.log(data, "waya");
-
       if (data.type === "draw") {
         if (data.shape === "line") {
           const { shapeObj } = data;
@@ -64,6 +62,12 @@ function useSocketListener(
             prev.filter((ellipse) => ellipse.id !== targetShapeId)
           );
         }
+
+        if (data.command.shape === "text") {
+          console.log(data, "wayaya");
+          const { targetShapeId } = data.command;
+          setTexts((prev) => prev.filter((text) => text.id !== targetShapeId));
+        }
       }
 
       if (data.type === "redo") {
@@ -75,6 +79,11 @@ function useSocketListener(
         if (data.command.shape === "ellipse") {
           const { ellipse } = data.command;
           setEllipses((prev) => [...prev, ellipse]);
+        }
+
+        if (data.command.shape === "text") {
+          const { text } = data.command;
+          setTexts((prev) => [...prev, text]);
         }
       }
     });
@@ -93,7 +102,14 @@ function useSocketListener(
       socket.off("command");
       socket.off("cursormove");
     };
-  }, [roomId, currentUser, setLines, setEllipses, setOtherUserCursors]);
+  }, [
+    roomId,
+    currentUser,
+    setLines,
+    setEllipses,
+    setTexts,
+    setOtherUserCursors,
+  ]);
 }
 
 export default useSocketListener;

@@ -2,13 +2,19 @@ import { useNavigate } from "react-router";
 import { useCurrentUser } from "../contexts/CurrentUserContext";
 import type { LineInterface } from "../types/LineInterface";
 import type { EllipseInterface } from "../types/EllipseInterface";
+import type { TextInterface } from "../types/TextInterface";
 
 interface UserDisplayerProps {
   setLines: React.Dispatch<React.SetStateAction<LineInterface[]>>;
   setEllipses: React.Dispatch<React.SetStateAction<EllipseInterface[]>>;
+  setTexts: React.Dispatch<React.SetStateAction<TextInterface[]>>;
 }
 
-function UserDisplayer({ setLines, setEllipses }: UserDisplayerProps) {
+function UserDisplayer({
+  setLines,
+  setEllipses,
+  setTexts,
+}: UserDisplayerProps) {
   const { currentUser, setCurrentUser } = useCurrentUser();
   const navigate = useNavigate();
 
@@ -16,6 +22,7 @@ function UserDisplayer({ setLines, setEllipses }: UserDisplayerProps) {
     setCurrentUser(null);
     setLines([]);
     setEllipses([]);
+    setTexts([]);
     navigate("/");
   }
 

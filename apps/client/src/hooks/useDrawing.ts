@@ -11,7 +11,7 @@ import useDrawLine from "./useDrawLine";
 import useDrawEllipse from "./useDrawEllipse";
 import useSocketEmitter from "./useSocketEmitter";
 import useDrawRect from "./useDrawRect";
-import useTextInput from "./useTextInput";
+import useDrawText from "./useDrawText";
 
 function useDrawing(
   roomId: string | null,
@@ -42,11 +42,11 @@ function useDrawing(
   const {
     openTextArea,
     textAreaCoord,
-    Texts,
+    texts,
     setTexts,
     handleDblClick,
     handleTextSubmit,
-  } = useTextInput(roomId);
+  } = useDrawText(roomId);
 
   const {
     setRectRaw,
@@ -60,7 +60,7 @@ function useDrawing(
   const { selectedShape } = useDrawingSelector();
   const [otherUserCursors, setOtherUserCursors] = useState<UserCursor[]>([]);
 
-  useLoadRoomBoardData(roomId, setLines, setEllipses);
+  useLoadRoomBoardData(roomId, setLines, setEllipses, setTexts);
 
   useSocketListener(
     roomId,
@@ -145,6 +145,7 @@ function useDrawing(
         ownerId: currentUser.id,
         boardLines: lines,
         boardEllipses: ellipses,
+        boardTexts: texts,
       }),
     };
 
@@ -159,6 +160,7 @@ function useDrawing(
   function handleClearBoard() {
     setLines([]);
     setEllipses([]);
+    setTexts([]);
   }
 
   return {
@@ -172,7 +174,7 @@ function useDrawing(
     setEllipses,
     openTextArea,
     textAreaCoord,
-    Texts,
+    texts,
     setTexts,
     handleDblClick,
     handleTextSubmit,

@@ -43,11 +43,16 @@ export async function updateBoard(
   roomId: string,
   ownerId: string,
   boardLines: string,
-  boardEllipses: string
+  boardEllipses: string,
+  boardTexts: string
 ) {
   const { data, error } = await supabase
     .from('rooms')
-    .update({ stage_lines: boardLines, stage_ellipses: boardEllipses })
+    .update({
+      stage_lines: boardLines,
+      stage_ellipses: boardEllipses,
+      stage_texts: boardTexts,
+    })
     .eq('id', roomId)
     .eq('owner_id', ownerId)
     .select()
@@ -60,7 +65,7 @@ export async function updateBoard(
 export async function loadBoard(roomId: string) {
   const { data, error } = await supabase
     .from('rooms')
-    .select('stage_lines,stage_ellipses')
+    .select('stage_lines,stage_ellipses,stage_texts')
     .eq('id', roomId)
 
   if (error) throw new Error('Supabase db error: ' + error.message)

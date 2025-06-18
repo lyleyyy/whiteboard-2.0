@@ -15,6 +15,7 @@ interface WhiteBoardStageProps {
   isEllisping: boolean;
   ellipse: EllipseInterface | null;
   ellipses: EllipseInterface[];
+  texts: TextInterface[];
   isSelecting: boolean;
   selectingRect: RectInterface | null;
   handleMouseDown: (e: KonvaEventObject<PointerEvent>) => void;
@@ -23,7 +24,6 @@ interface WhiteBoardStageProps {
   // handleSelectShape: (shapeId: string) => void;
   // handleCursorMove: (e: KonvaEventObject<MouseEvent>) => void;
   handleDblClick: (e: KonvaEventObject<MouseEvent>) => void;
-  Texts: TextInterface[];
 }
 
 function WhiteBoardStage({
@@ -33,6 +33,7 @@ function WhiteBoardStage({
   isEllisping,
   ellipse,
   ellipses,
+  texts,
   isSelecting,
   selectingRect,
   handleMouseDown,
@@ -41,7 +42,6 @@ function WhiteBoardStage({
   // handleSelectShape,
   // handleCursorMove,
   handleDblClick,
-  Texts,
 }: WhiteBoardStageProps) {
   const { currentUser } = useCurrentUser();
   const stageRef = useRef<Konva.Stage>(null);
@@ -58,8 +58,8 @@ function WhiteBoardStage({
       onDblClick={handleDblClick}
     >
       <Layer>
-        {Texts &&
-          Texts.map((text) => (
+        {texts &&
+          texts.map((text) => (
             <Text
               key={text.id}
               id={text.id}

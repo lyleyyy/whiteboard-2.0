@@ -41,10 +41,16 @@ export async function getRoomById(req: Request, res: Response) {
 // }
 
 export async function saveRoomData(req: Request, res: Response) {
-  const { roomId, ownerId, boardLines, boardEllipses } = req.body
+  const { roomId, ownerId, boardLines, boardEllipses, boardTexts } = req.body
 
   try {
-    const data = await updateBoard(roomId, ownerId, boardLines, boardEllipses)
+    const data = await updateBoard(
+      roomId,
+      ownerId,
+      boardLines,
+      boardEllipses,
+      boardTexts
+    )
     if (data) res.status(200).json({ message: 'Board status just saved...' })
   } catch (err) {
     res.status(500).json({ message: 'Internal Error' })

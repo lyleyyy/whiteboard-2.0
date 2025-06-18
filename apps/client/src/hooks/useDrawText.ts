@@ -4,17 +4,20 @@ import { useDrawingSelector } from "../contexts/DrawingSelectorContext";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { v4 as uuidv4 } from "uuid";
 import useSocketEmitter from "./useSocketEmitter";
+import { DrawTextCommand } from "../commands/DrawTextCommand";
+import { useUndoRedoStack } from "../contexts/UndoRedoStackContext";
 
-function useTextInput(roomId: string | null) {
+function useDrawText(roomId: string | null) {
   const [openTextArea, setOpenTextArea] = useState<boolean>(false);
   const [textAreaCoord, setTextAreaCoord] = useState<{
     x: number;
     y: number;
   } | null>(null);
-  const [Texts, setTexts] = useState<TextInterface[]>([]);
+  const [texts, setTexts] = useState<TextInterface[]>([]);
   const { emitDrawingShape } = useSocketEmitter();
 
   const { selectedShape } = useDrawingSelector();
+  const { setUndoStack, setRedoStack } = useUndoRedoStack();
 
   function handleDblClick(e: KonvaEventObject<MouseEvent>) {
     if (selectedShape !== "cursor") return;
@@ -41,6 +44,10 @@ function useTextInput(roomId: string | null) {
     e.target.value = "";
     setOpenTextArea(false);
 
+    const drawTextCommand = new DrawTextCommand(newText, setTexts);
+    setUndoStack((prev) => [...prev, drawTextCommand]);
+    setRedoStack([]);
+
     if (roomId) {
       emitDrawingShape(roomId, "text", newText);
     }
@@ -51,11 +58,11 @@ function useTextInput(roomId: string | null) {
     setOpenTextArea,
     textAreaCoord,
     setTextAreaCoord,
-    Texts,
+    texts,
     setTexts,
     handleDblClick,
     handleTextSubmit,
   };
 }
 
-export default useTextInput;
+export default useDrawText;
