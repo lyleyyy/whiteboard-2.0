@@ -16,13 +16,14 @@ import OtherUserCursorsDisplayer from "./components/OtherUserCursorsDisplayer.ts
 function App() {
   const { currentUser } = useCurrentUser();
   // const [selectedShapeIds, setSelectedShapeIds] = useState<string[]>([]);
+
   const {
     roomId,
     isNewRoomModalOpen,
     setIsNewRoomModalOpen,
     isRoomOwner,
     handleNewRoom,
-  } = useRoom(currentUser);
+  } = useRoom();
 
   const {
     isDrawing,

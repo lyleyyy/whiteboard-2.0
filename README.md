@@ -1,6 +1,6 @@
 # 🧠 Whiteboard 2.0
 
-A real-time collaborative whiteboard application built with a modern full-stack monorepo architecture mainly using **Turborepo**, **Vite**, **Express**, and **Socket.IO**. Supports live drawing, room-based collaboration, and persistent data with Supabase.
+A real-time collaborative whiteboard application built with a modern full-stack monorepo architecture mainly using **Turborepo**, **Vite**, **Express**, **Supabase** and **Socket.IO**. Supports live drawing, room-based collaboration, and persistent data with Supabase.
 
 ---
 
@@ -9,6 +9,7 @@ A real-time collaborative whiteboard application built with a modern full-stack 
 - **Monorepo Tool**: Turborepo + Yarn Workspaces
 - **Frontend**: React, Vite, Tailwind CSS, Konva, TypeScript, Socket.IO
 - **Backend**: Node.js, Express, TypeScript, Socket.IO
+- **Database**: PostgreSQL (Supabase)
 - **Deployment**:
   - **Client**: ✅ **AWS S3 (Static Hosting) + CloudFront**
   - **Server**: ✅ **AWS Elastic Beanstalk**

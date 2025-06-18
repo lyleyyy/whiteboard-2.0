@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { LineInterface } from "../types/LineInterface";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { useDrawingSelector } from "../contexts/DrawingSelectorContext";
@@ -11,12 +11,14 @@ import { v4 as uuidv4 } from "uuid";
 import ellipseParametersCalculator from "../utils/ellipseParametersCalculator";
 import rectParametersCalculator from "../utils/rectParametersCalculator";
 import { DrawLineCommand } from "../commands/DrawLineCommand";
-import type { DrawCommand } from "../commands/types";
 import { DrawEllipseCommand } from "../commands/DrawEllipseCommand";
 import type { User } from "../types/User";
 import type { UserCursor } from "../types/UserCursor";
 import toast from "react-hot-toast";
 import baseUrl from "../utils/baseUrl";
+import useSocketListener from "./useSocketListener";
+import useUndoRedo from "./useUndoRedo";
+import useLoadRoomBoardData from "./useLoadRoomBoardData";
 
 function useDrawing(
   roomId: string | null,
@@ -36,167 +38,21 @@ function useDrawing(
   const [selectingRect, setSelectingRect] = useState<RectInterface | null>(
     null
   );
-  const [undoStack, setUndoStack] = useState<DrawCommand[]>([]);
-  const [redoStack, setRedoStack] = useState<DrawCommand[]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
   const { selectedShape, selectedColor } = useDrawingSelector();
 
   const [otherUserCursors, setOtherUserCursors] = useState<UserCursor[]>([]);
 
+  const { setUndoStack, setRedoStack } = useUndoRedo(roomId);
   // load room board saved status
-  useEffect(() => {
-    async function getRoomData() {
-      if (!roomId || !currentUser) return;
-
-      const params = new URLSearchParams({
-        roomId,
-        // userId: currentUser.id,
-      });
-
-      const url = `${baseUrl}/room?${params.toString()}`;
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-
-      const res = await fetch(url, options);
-      const data = await res.json();
-
-      if (data) setLines(data.room.stage_lines);
-      if (data) setEllipses(data.room.stage_ellipses);
-    }
-
-    if (roomId) getRoomData();
-  }, [roomId, currentUser]);
-
-  useEffect(() => {
-    function undoRedo(e: KeyboardEvent) {
-      if (!currentUser) return;
-
-      if (e.key === "z" && e.metaKey) {
-        // redo
-        if (e.shiftKey) {
-          if (redoStack.length !== 0) {
-            const redoCommand = redoStack.pop();
-            if (redoCommand) {
-              redoCommand.do();
-              setUndoStack((prev) => [...prev, redoCommand]);
-              setRedoStack(redoStack);
-
-              if (roomId) {
-                socket.emit("command", {
-                  type: "redo",
-                  shape: redoCommand.shape,
-                  command: redoCommand,
-                  roomId,
-                  userId: currentUser.id,
-                });
-              }
-            }
-          }
-        } else {
-          // undo
-          if (undoStack.length !== 0) {
-            const undoCommand = undoStack.pop();
-            if (undoCommand) {
-              undoCommand.undo();
-              setRedoStack((prev) => [...prev, undoCommand]);
-              setUndoStack(undoStack);
-
-              if (roomId) {
-                socket.emit("command", {
-                  type: "undo",
-                  shape: undoCommand.shape,
-                  command: undoCommand,
-                  roomId,
-                  userId: currentUser.id,
-                });
-              }
-            }
-          }
-        }
-      }
-    }
-
-    window.addEventListener("keydown", undoRedo);
-
-    return () => {
-      window.removeEventListener("keydown", undoRedo);
-    };
-  }, [undoStack, redoStack, lines, roomId, currentUser]);
-
-  // socket listener
-  useEffect(() => {
-    socket.on("command", (data) => {
-      if (!currentUser || roomId !== data.roomId) return;
-
-      // testing
-      // console.log(data.userId, "data.userId");
-      // this is where the bug happened, the local undo delete the line, but in the event loop it not yet re-render, and then this emit command undo happen, the lines state is the same as the one just deleted line, so the state is not change, so the line has been deleted from the lines, but the re-render is not triggered? But why only happend when another user draw something
-      if (data.userId === currentUser.id) return;
-
-      if (data.type === "draw") {
-        if (data.shape === "line") {
-          const { line } = data;
-          setLines((prev) => [
-            ...prev.filter((drawedLine) => drawedLine.id !== line.id),
-            line,
-          ]);
-        }
-
-        if (data.shape === "ellipse") {
-          const { ellipse } = data;
-          setEllipses((prev) => [
-            ...prev.filter((drawedEllipse) => drawedEllipse.id !== ellipse.id),
-            ellipse,
-          ]);
-        }
-      }
-
-      if (data.type === "undo") {
-        if (data.command.shape === "line") {
-          const { targetShapeId } = data.command;
-          setLines((prev) => prev.filter((line) => line.id !== targetShapeId));
-        }
-
-        if (data.command.shape === "ellipse") {
-          const { targetShapeId } = data.command;
-          setEllipses((prev) =>
-            prev.filter((ellipse) => ellipse.id !== targetShapeId)
-          );
-        }
-      }
-
-      if (data.type === "redo") {
-        if (data.command.shape === "line") {
-          const { line } = data.command;
-          setLines((prev) => [...prev, line]);
-        }
-
-        if (data.command.shape === "ellipse") {
-          const { ellipse } = data.command;
-          setEllipses((prev) => [...prev, ellipse]);
-        }
-      }
-    });
-
-    socket.on("cursormove", (data) => {
-      const { newCoord, userId, userName } = data;
-      if (!currentUser || userId === currentUser.id || !roomId) return;
-
-      setOtherUserCursors((prev) => [
-        ...prev.filter((otherUserCursor) => otherUserCursor.userId !== userId),
-        { userId, coord: newCoord, userName },
-      ]);
-    });
-
-    return () => {
-      socket.off("command");
-      socket.off("cursormove");
-    };
-  }, [roomId, currentUser]);
+  useLoadRoomBoardData(roomId, setLines, setEllipses);
+  useSocketListener(
+    currentUser,
+    roomId,
+    setLines,
+    setEllipses,
+    setOtherUserCursors
+  );
 
   function handleMouseDown(e: KonvaEventObject<PointerEvent>) {
     if (e.evt.button === 0) {

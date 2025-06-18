@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import type { User } from "../types/User";
 import { useSearchParams } from "react-router";
 import { socket } from "../lib/socketClient";
 import baseUrl from "../utils/baseUrl";
+import { useCurrentUser } from "../contexts/CurrentUserContext";
 
-function useRoom(currentUser: User | null) {
+function useRoom() {
   const [isNewRoomModalOpen, setIsNewRoomModalOpen] = useState<boolean>(false);
   const [isRoomOwner, setIsRoomOwner] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const { currentUser } = useCurrentUser();
   const roomId = searchParams.get("room");
 
   // if there is params of roomId in the url, join the room

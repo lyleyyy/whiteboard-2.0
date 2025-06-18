@@ -10,7 +10,7 @@ yarn build
 cd ../..
 
 echo "📂 Step 2: Prepare deploy folder"
-rm -rf server-deploy server-deploy.zip
+rm -rf server-deploy whiteboard-server-deploy.zip
 mkdir server-deploy
 cp -r apps/server/dist server-deploy/
 cp apps/server/package.json server-deploy/
