@@ -1,0 +1,87 @@
+import { useEffect } from "react";
+import { socket } from "../lib/socketClient";
+import type { User } from "../types/User";
+import type { LineInterface } from "../types/LineInterface";
+import type { EllipseInterface } from "../types/EllipseInterface";
+import type { UserCursor } from "../types/UserCursor";
+
+function useSocketListener(
+  currentUser: User | null,
+  roomId: string | null,
+  setLines: React.Dispatch<React.SetStateAction<LineInterface[]>>,
+  setEllipses: React.Dispatch<React.SetStateAction<EllipseInterface[]>>,
+  setOtherUserCursors: React.Dispatch<React.SetStateAction<UserCursor[]>>
+) {
+  // socket listener
+  useEffect(() => {
+    socket.on("command", (data) => {
+      if (!currentUser || roomId !== data.roomId) return;
+
+      // testing
+      // console.log(data.userId, "data.userId");
+      // this is where the bug happened, the local undo delete the line, but in the event loop it not yet re-render, and then this emit command undo happen, the lines state is the same as the one just deleted line, so the state is not change, so the line has been deleted from the lines, but the re-render is not triggered? But why only happend when another user draw something
+      if (data.userId === currentUser.id) return;
+
+      if (data.type === "draw") {
+        if (data.shape === "line") {
+          const { line } = data;
+          setLines((prev) => [
+            ...prev.filter((drawedLine) => drawedLine.id !== line.id),
+            line,
+          ]);
+        }
+
+        if (data.shape === "ellipse") {
+          const { ellipse } = data;
+          setEllipses((prev) => [
+            ...prev.filter((drawedEllipse) => drawedEllipse.id !== ellipse.id),
+            ellipse,
+          ]);
+        }
+      }
+
+      if (data.type === "undo") {
+        if (data.command.shape === "line") {
+          const { targetShapeId } = data.command;
+          setLines((prev) => prev.filter((line) => line.id !== targetShapeId));
+        }
+
+        if (data.command.shape === "ellipse") {
+          const { targetShapeId } = data.command;
+          setEllipses((prev) =>
+            prev.filter((ellipse) => ellipse.id !== targetShapeId)
+          );
+        }
+      }
+
+      if (data.type === "redo") {
+        if (data.command.shape === "line") {
+          const { line } = data.command;
+          setLines((prev) => [...prev, line]);
+        }
+
+        if (data.command.shape === "ellipse") {
+          const { ellipse } = data.command;
+          setEllipses((prev) => [...prev, ellipse]);
+        }
+      }
+    });
+
+    socket.on("cursormove", (data) => {
+      const { newCoord, userId, userName } = data;
+      if (!currentUser || userId === currentUser.id || !roomId) return;
+
+      setOtherUserCursors((prev) => [
+        ...prev.filter((otherUserCursor) => otherUserCursor.userId !== userId),
+        { userId, coord: newCoord, userName },
+      ]);
+    });
+
+    return () => {
+      socket.off("command");
+      socket.off("cursormove");
+    };
+  }, [roomId, currentUser, setLines, setEllipses, setOtherUserCursors]);
+}
+
+export default useSocketListener;

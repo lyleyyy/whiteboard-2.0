@@ -1,84 +1,168 @@
-# Turborepo starter
+# 🧠 Whiteboard 2.0
 
-This Turborepo starter is maintained by the Turborepo core team.
+A real-time collaborative whiteboard application built with a modern full-stack monorepo architecture mainly using **Turborepo**, **Vite**, **Express**, **Supabase** and **Socket.IO**. Supports live drawing, room-based collaboration, and persistent data with Supabase.
 
-## Using this example
+---
 
-Run the following command:
+## 📦 Tech Stack
 
-```sh
-npx create-turbo@latest
+- **Monorepo Tool**: Turborepo + Yarn Workspaces
+- **Frontend**: React, Vite, Tailwind CSS, Konva, TypeScript, Socket.IO
+- **Backend**: Node.js, Express, TypeScript, Socket.IO
+- **Database**: PostgreSQL (Supabase)
+- **Deployment**:
+  - **Client**: ✅ **AWS S3 (Static Hosting) + CloudFront**
+  - **Server**: ✅ **AWS Elastic Beanstalk**
+
+---
+
+## 📁 Project Structure
+
+```bash
+whiteboard-2.0/
+├── apps/
+│   ├── client/           # Frontend application (Vite + React)
+│   └── server/           # Backend application (Express + Socket.IO)
+├── scripts/
+│   ├── prepare-s3-deploy.sh # Helper script for AWS s3 deployment
+│   └── prepare-eb-deploy.sh # Helper script for AWS Elasticbeastalk deployment
+├── turbo.json            # Turborepo config
+├── package.json          # Yarn workspaces
+└── yarn.lock
+
+---
 ```
 
-## What's inside?
+## 🚀 Getting Started
 
-This Turborepo includes the following packages/apps:
+### 1. Install Dependencies
 
-### Apps and Packages
+```bash
+cd apps/client
+yarn
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
+cd apps/server
+yarn
 ```
 
-### Develop
+### 2. Run Development Apps
 
-To develop all apps and packages, run the following command:
+Frontend:
 
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
+```bash
+cd apps/client
+yarn dev
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+Backend:
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+```bash
+cd apps/server
+yarn dev
+```
+
+Or from the project root (where `package.json` and `turbo.json` are):
+
+```bash
+yarn dev
+```
+
+---
+
+## 🛠 Deploying to AWS
+
+### Client
+
+```bash
+./scripts/prepare-eb-deploy.sh
+```
+
+This will:
+
+- Install dependencies
+- Build the client
+- Deploy built dist to aws s3 bucket
+
+```bash
+aws s3 sync dist/ s3://YOUR_BUCKET_NAME --delete
+```
+
+Or you can:
+
+```bash
+cd apps/client
+yarn build
+```
+
+Upload to S3:
+You can upload the contents of dist/ to your S3 bucket manually or use AWS CLI:
+
+```bash
+aws s3 sync dist/ s3://your-bucket-name --delete
+```
+
+Note: Ensure your S3 bucket has Static Website Hosting enabled and CloudFront is configured (if needed) for custom domains.
+
+### Server
+
+### 1. Set Up Environment Variables
+
+Set them in Elastic Beanstalk (recommended), or create a `.env.production` file in `/apps/server`.
+
+Example:
 
 ```
-npx turbo link
+
+SUPABASE_URL=your-supabase-url
+SUPABASE_KEY=your-anon-key
+
 ```
 
-## Useful Links
+### 2. Build & Package Server
 
-Learn more about the power of Turborepo:
+```bash
+./scripts/prepare-eb-deploy.sh
+```
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+This will:
+
+- Install dependencies
+- Build the server
+- Zip everything into `whiteboard-server-deploy.zip`
+
+### 3. Upload to EB Console
+
+Upload `whiteboard-server-deploy.zip` to your Elastic Beanstalk application environment.
+
+---
+
+## ✅ Features
+
+- ✅ Real-time drawing with Socket.IO
+- ✅ Room-based collaborative sessions
+- ✅ WebSocket + RESTful API support
+- ✅ Supabase integration for persistent storage
+- ✅ AWS S3 static hosting deployment script
+- ✅ AWS Elastic Beanstalk deployment script
+- ✅ Modular monorepo architecture
+
+---
+
+## 🧪 In Progress / TODO
+
+- [ ] Authentication and access control
+- [ ] Frontend deployment to Vercel or S3
+- [ ] Unit / integration tests
+- [ ] More advanced drawing logic (e.g. shape tools, text input, selection...)
+- [ ] Further system performance optimization (e.g. debouncing, batching, scaling for more concurrent users...)
+- [ ] Auto CI/CD
+- [ ] ...
+
+---
+
+## 👨‍💻 Author
+
+**Lyle Yang**
+
+Full Stack Engineer based in Barcelona
+[LinkedIn](https://www.linkedin.com/in/lyle-yang-b694211b7/)
