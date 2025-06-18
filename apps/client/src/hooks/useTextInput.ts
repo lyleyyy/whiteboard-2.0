@@ -3,14 +3,16 @@ import type { TextInterface } from "../types/TextInterface";
 import { useDrawingSelector } from "../contexts/DrawingSelectorContext";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { v4 as uuidv4 } from "uuid";
+import useSocketEmitter from "./useSocketEmitter";
 
-function useTextInput() {
+function useTextInput(roomId: string | null) {
   const [openTextArea, setOpenTextArea] = useState<boolean>(false);
   const [textAreaCoord, setTextAreaCoord] = useState<{
     x: number;
     y: number;
   } | null>(null);
   const [Texts, setTexts] = useState<TextInterface[]>([]);
+  const { emitDrawingShape } = useSocketEmitter();
 
   const { selectedShape } = useDrawingSelector();
 
@@ -23,8 +25,8 @@ function useTextInput() {
   }
 
   function handleTextSubmit(e: React.FocusEvent<HTMLInputElement>) {
-    if (!textAreaCoord) return;
     const text = e.target.value;
+    if (!textAreaCoord || !text) return;
 
     const newText = {
       id: uuidv4(),
@@ -38,6 +40,10 @@ function useTextInput() {
     setTexts((prev) => [...prev, newText]);
     e.target.value = "";
     setOpenTextArea(false);
+
+    if (roomId) {
+      emitDrawingShape(roomId, "text", newText);
+    }
   }
 
   return {

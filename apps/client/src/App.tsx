@@ -14,17 +14,9 @@ import WhiteBoardStage from "./components/WhiteBoardStage.tsx";
 import OtherUserCursorsDisplayer from "./components/OtherUserCursorsDisplayer.tsx";
 import { useEffect } from "react";
 import useUndoRedo from "./hooks/useUndoRedo.ts";
-import useTextInput from "./hooks/useTextInput.ts";
 
 function App() {
   const { currentUser } = useCurrentUser();
-  const {
-    openTextArea,
-    textAreaCoord,
-    Texts,
-    handleDblClick,
-    handleTextSubmit,
-  } = useTextInput();
   // const [selectCoord, setSelectCoord] = useState<{
   //   x: number;
   //   y: number;
@@ -47,6 +39,11 @@ function App() {
     ellipse,
     ellipses,
     setEllipses,
+    openTextArea,
+    textAreaCoord,
+    Texts,
+    handleDblClick,
+    handleTextSubmit,
     isSelecting,
     selectingRect,
     otherUserCursors,
@@ -67,6 +64,11 @@ function App() {
     };
   }, [undoRedo]);
 
+  // function handleSelectShape(shapeId: string) {
+  //   console.log(shapeId);
+  //   setSelectedShapeIds([shapeId]);
+  // }
+
   // function handleCursorMove(e: KonvaEventObject<MouseEvent>) {
   //   if (selectedShape !== "cursor") return;
   //   const hoveredNode = e.target;
@@ -84,11 +86,6 @@ function App() {
   //     document.body.style.cursor = "default";
   //   }
   // }
-
-  function handleSelectShape(shapeId: string) {
-    console.log(shapeId);
-    // setSelectedShapeIds([shapeId]);
-  }
 
   return (
     <>
@@ -142,7 +139,7 @@ function App() {
         handleMouseDown={handleMouseDown}
         handleMouseMove={handleMouseMove}
         handleMouseUp={handleMouseUp}
-        handleSelectShape={handleSelectShape}
+        // handleSelectShape={handleSelectShape}
         // handleCursorMove={handleCursorMove}
         handleDblClick={handleDblClick}
         Texts={Texts}

@@ -1,14 +1,16 @@
 import { useEffect } from "react";
 import { socket } from "../lib/socketClient";
+import { useCurrentUser } from "../contexts/CurrentUserContext";
 import type { LineInterface } from "../types/LineInterface";
 import type { EllipseInterface } from "../types/EllipseInterface";
 import type { UserCursor } from "../types/UserCursor";
-import { useCurrentUser } from "../contexts/CurrentUserContext";
+import type { TextInterface } from "../types/TextInterface";
 
 function useSocketListener(
   roomId: string | null,
   setLines: React.Dispatch<React.SetStateAction<LineInterface[]>>,
   setEllipses: React.Dispatch<React.SetStateAction<EllipseInterface[]>>,
+  setTexts: React.Dispatch<React.SetStateAction<TextInterface[]>>,
   setOtherUserCursors: React.Dispatch<React.SetStateAction<UserCursor[]>>
 ) {
   const { currentUser } = useCurrentUser();
@@ -21,6 +23,8 @@ function useSocketListener(
       // console.log(data.userId, "data.userId");
       // this is where the bug happened, the local undo delete the line, but in the event loop it not yet re-render, and then this emit command undo happen, the lines state is the same as the one just deleted line, so the state is not change, so the line has been deleted from the lines, but the re-render is not triggered? But why only happend when another user draw something
       if (data.userId === currentUser.id) return;
+
+      console.log(data, "waya");
 
       if (data.type === "draw") {
         if (data.shape === "line") {
@@ -35,6 +39,14 @@ function useSocketListener(
           const { shapeObj } = data;
           setEllipses((prev) => [
             ...prev.filter((drawedEllipse) => drawedEllipse.id !== shapeObj.id),
+            shapeObj,
+          ]);
+        }
+
+        if (data.shape === "text") {
+          const { shapeObj } = data;
+          setTexts((prev) => [
+            ...prev.filter((drawedText) => drawedText.id !== shapeObj.id),
             shapeObj,
           ]);
         }

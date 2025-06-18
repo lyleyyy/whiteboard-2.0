@@ -20,7 +20,7 @@ interface WhiteBoardStageProps {
   handleMouseDown: (e: KonvaEventObject<PointerEvent>) => void;
   handleMouseMove: (e: KonvaEventObject<PointerEvent>) => void;
   handleMouseUp: () => void;
-  handleSelectShape: (shapeId: string) => void;
+  // handleSelectShape: (shapeId: string) => void;
   // handleCursorMove: (e: KonvaEventObject<MouseEvent>) => void;
   handleDblClick: (e: KonvaEventObject<MouseEvent>) => void;
   Texts: TextInterface[];
@@ -38,7 +38,7 @@ function WhiteBoardStage({
   handleMouseDown,
   handleMouseMove,
   handleMouseUp,
-  handleSelectShape,
+  // handleSelectShape,
   // handleCursorMove,
   handleDblClick,
   Texts,
@@ -70,7 +70,6 @@ function WhiteBoardStage({
               fill={text.fill}
             />
           ))}
-        {/* <Text x={100} y={100} text={"waya"} fontSize={18} fill="black" /> */}
         {currentUser &&
           ellipses &&
           ellipses.map((ellipse) => (
@@ -97,7 +96,7 @@ function WhiteBoardStage({
               points={line.points}
               stroke={line.stroke}
               strokeWidth={line.strokeWidth}
-              onClick={() => handleSelectShape(line.id)}
+              // onClick={() => handleSelectShape(line.id)}
             />
           ))}
 
@@ -109,7 +108,7 @@ function WhiteBoardStage({
             radiusY={ellipse.radiusY}
             stroke={ellipse.stroke}
             strokeWidth={ellipse.strokeWidth}
-            onClick={() => handleSelectShape(ellipse.id)}
+            // onClick={() => handleSelectShape(ellipse.id)}
           />
         )}
 

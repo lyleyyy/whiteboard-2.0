@@ -2,6 +2,7 @@ import { useCurrentUser } from "../contexts/CurrentUserContext";
 import { socket } from "../lib/socketClient";
 import type { EllipseInterface } from "../types/EllipseInterface";
 import type { LineInterface } from "../types/LineInterface";
+import type { TextInterface } from "../types/TextInterface";
 
 function useSocketEmitter() {
   const { currentUser } = useCurrentUser();
@@ -20,8 +21,8 @@ function useSocketEmitter() {
 
   function emitDrawingShape(
     roomId: string | null,
-    shape: "ellipse" | "line" | "rect",
-    ShapeObj: EllipseInterface | LineInterface
+    shape: "ellipse" | "line" | "rect" | "text",
+    ShapeObj: EllipseInterface | LineInterface | TextInterface
   ) {
     socket.emit("command", {
       type: "draw",
