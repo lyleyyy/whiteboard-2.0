@@ -1,11 +1,7 @@
 import ModalContainer from "../UI/ModalContainer";
 import { useState, type FormEvent } from "react";
 import { useCurrentUser } from "../contexts/CurrentUserContext";
-
-const baseUrl =
-  import.meta.env.PRODUCTION === "1"
-    ? import.meta.env.VITE_SOCKET_SERVER_ADDRESS_PRODUCTION
-    : import.meta.env.VITE_SOCKET_SERVER_ADDRESS_DEV;
+import baseUrl from "../utils/baseUrl";
 
 function LoginModal() {
   const { setCurrentUser } = useCurrentUser();
