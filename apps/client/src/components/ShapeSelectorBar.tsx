@@ -21,7 +21,7 @@ const shapes: ShapeConfig[] = [
   { id: "hand", icon: FaRegHandPaper },
   { id: "pencil", icon: HiOutlinePencil },
   { id: "cursor", icon: PiCursorFill },
-  { id: "circle", icon: FaRegCircle },
+  { id: "ellipse", icon: FaRegCircle },
   { id: "square", icon: FaRegSquare },
   { id: "diamond", icon: LuDiamond },
   { id: "arrow", icon: HiOutlineArrowNarrowRight },

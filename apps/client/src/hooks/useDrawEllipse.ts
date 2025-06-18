@@ -6,6 +6,8 @@ import { useDrawingSelector } from "../contexts/DrawingSelectorContext";
 import { v4 as uuidv4 } from "uuid";
 import { useCurrentUser } from "../contexts/CurrentUserContext";
 import useSocketEmitter from "./useSocketEmitter";
+import { DrawEllipseCommand } from "../commands/DrawEllipseCommand";
+import { useUndoRedoStack } from "../contexts/UndoRedoStackContext";
 
 function useDrawEllipse(roomId: string | null) {
   const [isEllisping, setIsEllisping] = useState(false);
@@ -18,6 +20,7 @@ function useDrawEllipse(roomId: string | null) {
   const { selectedColor } = useDrawingSelector();
   const { currentUser } = useCurrentUser();
   const { emitDrawingShape } = useSocketEmitter();
+  const { setUndoStack, setRedoStack } = useUndoRedoStack();
 
   function drawingNewEllipse(newCoord: { x: number; y: number }) {
     if (!currentUser) return;
@@ -46,6 +49,20 @@ function useDrawEllipse(roomId: string | null) {
     }
   }
 
+  function finishDrawEllipse() {
+    setIsEllisping(false);
+
+    if (ellipse) {
+      setEllipses((prev) => [...(prev ?? []), ellipse]);
+      const drawEllipseCommand = new DrawEllipseCommand(ellipse, setEllipses);
+      setUndoStack((prev) => [...prev, drawEllipseCommand]);
+      setRedoStack([]);
+    }
+
+    setEllipseRaw(null);
+    setEllipse(null);
+  }
+
   return {
     isEllisping,
     setIsEllisping,
@@ -56,6 +73,7 @@ function useDrawEllipse(roomId: string | null) {
     ellipses,
     setEllipses,
     drawingNewEllipse,
+    finishDrawEllipse,
   };
 }
 

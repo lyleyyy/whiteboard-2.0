@@ -1,9 +1,11 @@
 import { useState } from "react";
 import type { LineInterface } from "../types/LineInterface";
 import { useCurrentUser } from "../contexts/CurrentUserContext";
-import { socket } from "../lib/socketClient";
 import { v4 as uuidv4 } from "uuid";
 import { useDrawingSelector } from "../contexts/DrawingSelectorContext";
+import { useUndoRedoStack } from "../contexts/UndoRedoStackContext";
+import { DrawLineCommand } from "../commands/DrawLineCommand";
+import useSocketEmitter from "./useSocketEmitter";
 
 function useDrawLine(roomId: string | null) {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -11,6 +13,9 @@ function useDrawLine(roomId: string | null) {
   const [lines, setLines] = useState<LineInterface[]>([]);
   const { currentUser } = useCurrentUser();
   const { selectedColor } = useDrawingSelector();
+  const { setUndoStack, setRedoStack } = useUndoRedoStack();
+
+  const { emitDrawingShape } = useSocketEmitter();
 
   function drawingNewLine(newCoord: { x: number; y: number }) {
     if (!currentUser) return;
@@ -25,15 +30,22 @@ function useDrawLine(roomId: string | null) {
     setLine(newLine);
 
     if (roomId) {
-      socket.emit("command", {
-        type: "draw",
-        shape: "line",
-        line: newLine,
-        roomId,
-        userId: currentUser.id,
-      });
+      emitDrawingShape(roomId, "line", newLine);
     }
     // throttledEmit(newLine);
+  }
+
+  function finishDrawLine() {
+    setIsDrawing(false);
+
+    if (line) {
+      setLines((prev) => [...(prev ?? []), line]);
+      const drawLineCommand = new DrawLineCommand(line, setLines);
+      setUndoStack((prev) => [...prev, drawLineCommand]);
+      setRedoStack([]);
+    }
+
+    setLine(null);
   }
 
   return {
@@ -44,6 +56,7 @@ function useDrawLine(roomId: string | null) {
     lines,
     setLines,
     drawingNewLine,
+    finishDrawLine,
   };
 }
 

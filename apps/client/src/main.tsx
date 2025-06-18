@@ -21,11 +21,11 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <CurrentUserProvider>
-      <UndoRedoStackProvider>
-        <DrawingSelectorProvider>
+      <DrawingSelectorProvider>
+        <UndoRedoStackProvider>
           <RouterProvider router={router} />
-        </DrawingSelectorProvider>
-      </UndoRedoStackProvider>
+        </UndoRedoStackProvider>
+      </DrawingSelectorProvider>
     </CurrentUserProvider>
   </StrictMode>
 );

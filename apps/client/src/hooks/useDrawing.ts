@@ -1,14 +1,11 @@
 import { useState } from "react";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { useDrawingSelector } from "../contexts/DrawingSelectorContext";
-import { DrawLineCommand } from "../commands/DrawLineCommand";
-import { DrawEllipseCommand } from "../commands/DrawEllipseCommand";
 import type { User } from "../types/User";
 import type { UserCursor } from "../types/UserCursor";
 import toast from "react-hot-toast";
 import baseUrl from "../utils/baseUrl";
 import useSocketListener from "./useSocketListener";
-import useUndoRedo from "./useUndoRedo";
 import useLoadRoomBoardData from "./useLoadRoomBoardData";
 import useDrawLine from "./useDrawLine";
 import useDrawEllipse from "./useDrawEllipse";
@@ -24,10 +21,10 @@ function useDrawing(
     isDrawing,
     setIsDrawing,
     line,
-    setLine,
     lines,
     setLines,
     drawingNewLine,
+    finishDrawLine,
   } = useDrawLine(roomId);
 
   const {
@@ -35,10 +32,10 @@ function useDrawing(
     setIsEllisping,
     setEllipseRaw,
     ellipse,
-    setEllipse,
     ellipses,
     setEllipses,
     drawingNewEllipse,
+    finishDrawEllipse,
   } = useDrawEllipse(roomId);
 
   const {
@@ -51,19 +48,12 @@ function useDrawing(
   } = useDrawRect();
 
   const { selectedShape } = useDrawingSelector();
-
   const [otherUserCursors, setOtherUserCursors] = useState<UserCursor[]>([]);
 
-  const { setUndoStack, setRedoStack } = useUndoRedo(roomId);
-  // load room board saved status
   useLoadRoomBoardData(roomId, setLines, setEllipses);
-  useSocketListener(
-    currentUser,
-    roomId,
-    setLines,
-    setEllipses,
-    setOtherUserCursors
-  );
+
+  useSocketListener(roomId, setLines, setEllipses, setOtherUserCursors);
+
   const { emitCursorMove } = useSocketEmitter();
 
   function handleMouseDown(e: KonvaEventObject<PointerEvent>) {
@@ -73,7 +63,7 @@ function useDrawing(
       if (selectedShape === "eraser") {
         setIsDrawing(true);
       }
-      if (selectedShape === "circle") {
+      if (selectedShape === "ellipse") {
         setIsEllisping(true);
 
         const newEllispe = {
@@ -115,30 +105,11 @@ function useDrawing(
 
   function handleMouseUp() {
     if (selectedShape === "pencil" || selectedShape === "eraser") {
-      setIsDrawing(false);
-
-      if (line) {
-        setLines((prev) => [...(prev ?? []), line]);
-        const drawLineCommand = new DrawLineCommand(line, setLines);
-        setUndoStack((prev) => [...prev, drawLineCommand]);
-        setRedoStack([]);
-      }
-
-      setLine(null);
+      finishDrawLine();
     }
 
-    if (selectedShape === "circle") {
-      setIsEllisping(false);
-
-      if (ellipse) {
-        setEllipses((prev) => [...(prev ?? []), ellipse]);
-        const drawEllipseCommand = new DrawEllipseCommand(ellipse, setEllipses);
-        setUndoStack((prev) => [...prev, drawEllipseCommand]);
-        setRedoStack([]);
-      }
-
-      setEllipseRaw(null);
-      setEllipse(null);
+    if (selectedShape === "ellipse") {
+      finishDrawEllipse();
     }
 
     if (selectedShape === "cursor") {

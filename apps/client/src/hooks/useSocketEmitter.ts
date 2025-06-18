@@ -26,7 +26,7 @@ function useSocketEmitter() {
     socket.emit("command", {
       type: "draw",
       shape: shape,
-      ellipse: ShapeObj,
+      shapeObj: ShapeObj,
       roomId,
       userId: currentUser!.id,
     });

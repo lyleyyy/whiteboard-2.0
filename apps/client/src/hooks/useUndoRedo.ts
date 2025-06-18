@@ -33,10 +33,7 @@ function useUndoRedo(roomId: string | null) {
         }
       } else {
         // undo
-        console.log("waya");
-        console.log(undoStack);
         if (undoStack.length !== 0) {
-          console.log(undoStack);
           const undoCommand = undoStack.pop();
 
           if (undoCommand) {

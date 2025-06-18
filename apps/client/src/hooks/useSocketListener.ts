@@ -1,17 +1,17 @@
 import { useEffect } from "react";
 import { socket } from "../lib/socketClient";
-import type { User } from "../types/User";
 import type { LineInterface } from "../types/LineInterface";
 import type { EllipseInterface } from "../types/EllipseInterface";
 import type { UserCursor } from "../types/UserCursor";
+import { useCurrentUser } from "../contexts/CurrentUserContext";
 
 function useSocketListener(
-  currentUser: User | null,
   roomId: string | null,
   setLines: React.Dispatch<React.SetStateAction<LineInterface[]>>,
   setEllipses: React.Dispatch<React.SetStateAction<EllipseInterface[]>>,
   setOtherUserCursors: React.Dispatch<React.SetStateAction<UserCursor[]>>
 ) {
+  const { currentUser } = useCurrentUser();
   // socket listener
   useEffect(() => {
     socket.on("command", (data) => {
@@ -24,18 +24,18 @@ function useSocketListener(
 
       if (data.type === "draw") {
         if (data.shape === "line") {
-          const { line } = data;
+          const { shapeObj } = data;
           setLines((prev) => [
-            ...prev.filter((drawedLine) => drawedLine.id !== line.id),
-            line,
+            ...prev.filter((drawedLine) => drawedLine.id !== shapeObj.id),
+            shapeObj,
           ]);
         }
 
         if (data.shape === "ellipse") {
-          const { ellipse } = data;
+          const { shapeObj } = data;
           setEllipses((prev) => [
-            ...prev.filter((drawedEllipse) => drawedEllipse.id !== ellipse.id),
-            ellipse,
+            ...prev.filter((drawedEllipse) => drawedEllipse.id !== shapeObj.id),
+            shapeObj,
           ]);
         }
       }
