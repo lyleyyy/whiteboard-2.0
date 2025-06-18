@@ -1,5 +1,5 @@
 import ModalContainer from "../UI/ModalContainer";
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useCurrentUser } from "../contexts/CurrentUserContext";
 
 const baseUrl =
@@ -9,9 +9,11 @@ const baseUrl =
 
 function LoginModal() {
   const { setCurrentUser } = useCurrentUser();
+  const [isLoggin, setIsLoggin] = useState(false);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setIsLoggin(true);
 
     const formData = new FormData(e.target as HTMLFormElement);
     const username = formData.get("username") as string;
@@ -27,6 +29,7 @@ function LoginModal() {
 
     const user = data.data;
     setCurrentUser(user);
+    setIsLoggin(false);
   }
 
   return (
@@ -38,24 +41,28 @@ function LoginModal() {
         <label className="text-3xl font-semibold text-gray-700 px-2">
           Nick Name
         </label>
-        <input
-          name="username"
-          className="w-full p-3 border-2 border-purple-300 rounded-md text-gray-800 
+        {!isLoggin && (
+          <input
+            name="username"
+            className="w-full p-3 border-2 border-purple-300 rounded-md text-gray-800 
           placeholder-gray-400 focus:outline-none focus:border-purple-500
             transition duration-200 ease-in-out
           "
-          type="text"
-          placeholder="Input your nick name..."
-          maxLength={6}
-          required
-        />
+            type="text"
+            placeholder="Input your nick name..."
+            maxLength={6}
+            disabled={isLoggin}
+            required
+          />
+        )}
 
         <button
-          className="mt-4 w-full py-3 bg-purple-600 text-white text-xl font-bold rounded-md shadow-lg hover:shadow-xl hover:bg-purple-500 active:scale-95 transition duration-250 ease-in-out
+          className="mt-4 w-full py-3 bg-purple-600 text-white text-xl font-bold rounded-md shadow-lg hover:shadow-xl hover:bg-purple-500 active:scale-95 transition duration-250 ease-in-out disabled:bg-gray-500
         "
           type="submit"
+          disabled={isLoggin}
         >
-          Start
+          {isLoggin ? "Loading..." : "Start"}
         </button>
       </form>
     </ModalContainer>

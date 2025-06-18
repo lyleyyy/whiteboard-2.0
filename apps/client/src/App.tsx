@@ -14,10 +14,21 @@ import WhiteBoardStage from "./components/WhiteBoardStage.tsx";
 import OtherUserCursorsDisplayer from "./components/OtherUserCursorsDisplayer.tsx";
 import { useEffect } from "react";
 import useUndoRedo from "./hooks/useUndoRedo.ts";
+import useTextInput from "./hooks/useTextInput.ts";
 
 function App() {
   const { currentUser } = useCurrentUser();
-  // const [selectedShapeIds, setSelectedShapeIds] = useState<string[]>([]);
+  const {
+    openTextArea,
+    textAreaCoord,
+    Texts,
+    handleDblClick,
+    handleTextSubmit,
+  } = useTextInput();
+  // const [selectCoord, setSelectCoord] = useState<{
+  //   x: number;
+  //   y: number;
+  // } | null>(null);
 
   const {
     roomId,
@@ -31,9 +42,11 @@ function App() {
     isDrawing,
     line,
     lines,
+    setLines,
     isEllisping,
     ellipse,
     ellipses,
+    setEllipses,
     isSelecting,
     selectingRect,
     otherUserCursors,
@@ -53,6 +66,24 @@ function App() {
       window.removeEventListener("keydown", undoRedo);
     };
   }, [undoRedo]);
+
+  // function handleCursorMove(e: KonvaEventObject<MouseEvent>) {
+  //   if (selectedShape !== "cursor") return;
+  //   const hoveredNode = e.target;
+
+  //   const isHoveringShapeObj =
+  //     hoveredNode.getClassName() === "Line" ||
+  //     hoveredNode.getClassName() === "Ellipse";
+
+  //   if (isHoveringShapeObj) {
+  //     const cursorCoord = e.target.getStage()?.getPointerPosition();
+  //     setSelectCoord(cursorCoord as { x: number; y: number });
+  //     document.body.style.cursor = "none";
+  //   } else {
+  //     setSelectCoord(null);
+  //     document.body.style.cursor = "default";
+  //   }
+  // }
 
   function handleSelectShape(shapeId: string) {
     console.log(shapeId);
@@ -112,6 +143,9 @@ function App() {
         handleMouseMove={handleMouseMove}
         handleMouseUp={handleMouseUp}
         handleSelectShape={handleSelectShape}
+        // handleCursorMove={handleCursorMove}
+        handleDblClick={handleDblClick}
+        Texts={Texts}
       />
 
       {roomId && currentUser && otherUserCursors.length > 0 && (
@@ -121,7 +155,34 @@ function App() {
         />
       )}
 
-      {currentUser && <UserDisplayer />}
+      {currentUser && (
+        <UserDisplayer setLines={setLines} setEllipses={setEllipses} />
+      )}
+
+      {openTextArea && textAreaCoord && (
+        <input
+          style={{
+            position: "absolute",
+            left: `${textAreaCoord.x}px`,
+            top: `${textAreaCoord.y}px`,
+          }}
+          autoFocus
+          className="text-black focus: outline-none"
+          onBlur={(e) => handleTextSubmit(e)}
+        />
+      )}
+
+      {/* {selectCoord && (
+        <span
+          className={`absolute flex -translate-1/2`}
+          style={{
+            left: `${selectCoord.x}px`,
+            top: `${selectCoord.y}px`,
+          }}
+        >
+          <FaArrowsAlt />
+        </span>
+      )} */}
     </>
   );
 }

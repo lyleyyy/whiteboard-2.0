@@ -1,12 +1,21 @@
 import { useNavigate } from "react-router";
 import { useCurrentUser } from "../contexts/CurrentUserContext";
+import type { LineInterface } from "../types/LineInterface";
+import type { EllipseInterface } from "../types/EllipseInterface";
 
-function UserDisplayer() {
+interface UserDisplayerProps {
+  setLines: React.Dispatch<React.SetStateAction<LineInterface[]>>;
+  setEllipses: React.Dispatch<React.SetStateAction<EllipseInterface[]>>;
+}
+
+function UserDisplayer({ setLines, setEllipses }: UserDisplayerProps) {
   const { currentUser, setCurrentUser } = useCurrentUser();
   const navigate = useNavigate();
 
   function handleLogout() {
     setCurrentUser(null);
+    setLines([]);
+    setEllipses([]);
     navigate("/");
   }
 
