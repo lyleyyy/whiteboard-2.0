@@ -36,11 +36,11 @@ function useDrawText(roomId: string | null) {
       x: textAreaCoord.x,
       y: textAreaCoord.y + 5,
       text,
-      fontSize: 18,
+      fontSize: 22,
       fill: "black",
     };
 
-    setTexts((prev) => [...prev, newText]);
+    setTexts((prev) => [...(prev ?? []), newText]);
     e.target.value = "";
     setOpenTextArea(false);
 

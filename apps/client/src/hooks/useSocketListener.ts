@@ -28,7 +28,9 @@ function useSocketListener(
         if (data.shape === "line") {
           const { shapeObj } = data;
           setLines((prev) => [
-            ...prev.filter((drawedLine) => drawedLine.id !== shapeObj.id),
+            ...(prev ?? []).filter(
+              (drawedLine) => drawedLine.id !== shapeObj.id
+            ),
             shapeObj,
           ]);
         }
@@ -36,7 +38,9 @@ function useSocketListener(
         if (data.shape === "ellipse") {
           const { shapeObj } = data;
           setEllipses((prev) => [
-            ...prev.filter((drawedEllipse) => drawedEllipse.id !== shapeObj.id),
+            ...(prev ?? []).filter(
+              (drawedEllipse) => drawedEllipse.id !== shapeObj.id
+            ),
             shapeObj,
           ]);
         }
@@ -44,7 +48,9 @@ function useSocketListener(
         if (data.shape === "text") {
           const { shapeObj } = data;
           setTexts((prev) => [
-            ...prev.filter((drawedText) => drawedText.id !== shapeObj.id),
+            ...(prev ?? []).filter(
+              (drawedText) => drawedText.id !== shapeObj.id
+            ),
             shapeObj,
           ]);
         }
